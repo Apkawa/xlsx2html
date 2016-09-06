@@ -1,0 +1,2 @@
+tox>=2.3
+pytest

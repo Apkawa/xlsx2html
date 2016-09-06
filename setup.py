@@ -18,7 +18,6 @@ def read(fname):
     return open(os.path.join(ROOT, fname)).read()
 
 
-install_requires = filter(None, read('requirements.txt').splitlines())
 
 setup(
     name='xlsx2html',
@@ -29,11 +28,11 @@ setup(
     author="Apkawa",
     author_email='apkawa@gmail.com',
     packages=[package for package in find_packages() if package.startswith(project_name)],
-    install_requires=install_requires,
+    install_requires=['six', 'openpyxl'],
     zip_safe=False,
     include_package_data=True,
     classifiers=[
-        'Development Status :: 4 - Alpha',
+        'Development Status :: 1 - Alpha',
         'Framework :: Django',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',

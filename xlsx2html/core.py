@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-
+import six
 import sys
 
 import openpyxl
@@ -14,11 +14,11 @@ BORDER_STYLES = {
 
 
 def render_attrs(attrs):
-    return ' '.join(["%s=%s" % a for a in attrs.items()])
+    return ' '.join(["%s=%s" % a for a in sorted(attrs.items(), key=lambda a: a[0])])
 
 
 def render_inline_styles(styles):
-    return ';'.join(["%s: %s" % a for a in styles.items()])
+    return ';'.join(["%s: %s" % a for a in sorted(styles.items(), key=lambda a: a[0])])
 
 
 def get_styles_from_cell(cell):
@@ -32,7 +32,7 @@ def get_styles_from_cell(cell):
                 h_styles['border-%s-%s' % (b_dir, k)] = v
         else:
             h_styles['border-%s-style' % b_dir] = 'none'
-    if cell.alignment:
+    if cell.alignment.horizontal:
         h_styles['text-align'] = cell.alignment.horizontal
     h_styles['font-size'] = "%spx" % cell.font.sz
     if cell.font.b:
@@ -71,17 +71,17 @@ def worksheet_to_data(ws):
             height = 19
 
             if col_dim.customWidth:
-                width = col_dim.width / 10
+                width = round(col_dim.width / 10., 2)
             if row_dim.customHeight:
-                height = row_dim.height
+                height = round(row_dim.height, 2)
 
             cell_data = {
                 'value': cell.value or '&nbsp;',
                 'attrs': {},
                 'col-width': 96 * (width),
                 'style': {
-                    "width": "{}in".format(width or 0.89),
-                    "height": "{}px".format(height or 19),
+                    "width": "{}in".format(width),
+                    "height": "{}px".format(height),
                 },
             }
             cell_data['attrs'].update(merged_cell_map.get(cell.coordinate) or {})
@@ -135,7 +135,7 @@ def xls2html(filepath, output):
     html = render_data_to_html(data)
 
     with open(output, 'wb') as f:
-        f.write(str(html.encode('utf-8')))
+        f.write(six.binary_type(html.encode('utf-8')))
 
 
 if __name__ == '__main__':
