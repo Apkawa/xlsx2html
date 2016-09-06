@@ -90,14 +90,10 @@ def worksheet_to_data(ws):
     return data_list
 
 
-def render_data_to_html(data):
-    html = ['<html>'
-            '<head>'
-            '<meta charset="utf-8">'
-            '</head>'
-            '<body>',
-            '<table  style="border-collapse: collapse" border="0" cellspacing="0" cellpadding="0">'
-            ]
+def render_table(data):
+    html = [
+        '<table  style="border-collapse: collapse" border="0" cellspacing="0" cellpadding="0">'
+    ]
     for i, row in enumerate(data):
         if i == 0:
             html.append('<colgroup>')
@@ -113,8 +109,24 @@ def render_data_to_html(data):
 
         trow.append('</tr>')
         html.append('\n'.join(trow))
-    html.append('</table></body></html>')
+    html.append('</table>')
     return '\n'.join(html)
+
+
+def render_data_to_html(data):
+    html = '''
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+    </head>
+    <body>
+        %s
+    </body>
+    </html>
+    '''
+    return html % render_table(data)
 
 
 def xls2html(filepath, output):
