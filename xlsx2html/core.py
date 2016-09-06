@@ -1,15 +1,28 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import six
+
 import sys
 
 import openpyxl
+import six
 
 BORDER_STYLES = {
+    'dashDot': {},
+    'dashDotDot': {},
+    'dashed': {},
+    'dotted': {},
+    'double': {},
+    'hair': {},
     'medium': {
         'style': 'solid',
         'width': '2px',
-    }
+    },
+    'mediumDashDot': {},
+    'mediumDashDotDot': {},
+    'mediumDashed': {},
+    'slantDashDot': {},
+    'thick': {},
+    'thin': {},
 }
 
 
@@ -21,20 +34,43 @@ def render_inline_styles(styles):
     return ';'.join(["%s: %s" % a for a in sorted(styles.items(), key=lambda a: a[0])])
 
 
-def get_styles_from_cell(cell):
+def get_border_style_from_cell(cell):
+    h_styles = {}
+    for b_dir in ['right', 'left', 'top', 'bottom']:
+        b_s = getattr(cell.border, b_dir)
+        if not b_s:
+            continue
+        for k, v in BORDER_STYLES.get(b_s.style, {}).items():
+            h_styles['border-%s-%s' % (b_dir, k)] = v
+    return h_styles
+
+
+def get_styles_from_cell(cell, merged_cell_map=None):
+    merged_cell_map = merged_cell_map or {}
+
     h_styles = {
         'border-collapse': 'collapse'
     }
-    for b_dir in ['right', 'left', 'top', 'bottom']:
-        b_s = getattr(cell.border, b_dir)
-        if b_s:
-            for k, v in BORDER_STYLES.get(b_s.style, {}).items():
-                h_styles['border-%s-%s' % (b_dir, k)] = v
-        else:
-            h_styles['border-%s-style' % b_dir] = 'none'
+    b_styles = get_border_style_from_cell(cell)
+    if merged_cell_map:
+        # TODO edged_cells
+        for m_cell in merged_cell_map['cells']:
+            b_styles.update(get_border_style_from_cell(m_cell))
+
+    for b_dir in ['border-right-style', 'border-left-style', 'border-top-style', 'border-bottom-style']:
+        if b_dir not in b_styles:
+            b_styles[b_dir] = 'none'
+    h_styles.update(b_styles)
+
     if cell.alignment.horizontal:
         h_styles['text-align'] = cell.alignment.horizontal
     h_styles['font-size'] = "%spx" % cell.font.sz
+    if cell.font.color.rgb:
+        h_styles['color'] = "#" + cell.font.color.rgb[2:]
+    if cell.fill.patternType == 'solid':
+        #TODO patternType != 'solid'
+        h_styles['background-color'] = '#' + cell.fill.fgColor.rgb[2:]
+
     if cell.font.b:
         h_styles['font-weight'] = 'bold'
     if cell.font.i:
@@ -51,9 +87,13 @@ def worksheet_to_data(ws):
     for cell_range in ws.merged_cell_ranges:
         cell_range_list = list(ws[cell_range])
         m_cell = cell_range_list[0][0]
+
         merged_cell_map[m_cell.coordinate] = {
-            'colspan': len(cell_range_list[0]),
-            'rowspan': len(cell_range_list),
+            'attrs': {
+                'colspan': len(cell_range_list[0]),
+                'rowspan': len(cell_range_list),
+            },
+            'cells': [c for rows in cell_range_list for c in rows],
         }
         exclded_cells.remove(m_cell.coordinate)
 
@@ -84,8 +124,11 @@ def worksheet_to_data(ws):
                     "height": "{}px".format(height),
                 },
             }
-            cell_data['attrs'].update(merged_cell_map.get(cell.coordinate) or {})
-            cell_data['style'].update(get_styles_from_cell(cell))
+            merged_cell_info = merged_cell_map.get(cell.coordinate, {})
+            if merged_cell_info:
+                cell_data['attrs'].update(merged_cell_info['attrs'])
+
+            cell_data['style'].update(get_styles_from_cell(cell, merged_cell_info))
             data_row.append(cell_data)
     return data_list
 
