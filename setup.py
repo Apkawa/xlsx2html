@@ -18,9 +18,8 @@ def read(fname):
     return open(os.path.join(ROOT, fname)).read()
 
 
-
 setup(
-    name='xlsx2html',
+    name=project_name,
     version=version,
     description=__doc__,
     long_description=read('README.rst'),
@@ -32,7 +31,7 @@ setup(
     zip_safe=False,
     include_package_data=True,
     classifiers=[
-        'Development Status :: 1 - Alpha',
+        'Development Status :: 3 - Alpha',
         'Framework :: Django',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',

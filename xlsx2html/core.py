@@ -6,7 +6,7 @@ import sys
 import openpyxl
 import six
 
-from format import  format_decimal
+from .format import format_decimal
 
 DEFAULT_BORDER_STYLE = {
     'style': 'solid',
@@ -53,6 +53,7 @@ BORDER_STYLES = {
     },
 }
 
+
 def format_cell(cell):
     value = cell.value
     formatted_value = value or '&nbsp;'
@@ -60,6 +61,7 @@ def format_cell(cell):
         if cell.number_format.lower() != 'general':
             formatted_value = format_decimal(value, cell.number_format, locale='ru')
     return formatted_value
+
 
 def render_attrs(attrs):
     return ' '.join(["%s=%s" % a for a in sorted(attrs.items(), key=lambda a: a[0])])
@@ -165,7 +167,6 @@ def worksheet_to_data(ws):
             if row_dim.customHeight:
                 height = round(row_dim.height, 2)
 
-
             cell_data = {
                 'value': cell.value,
                 'formatted_value': format_cell(cell),
@@ -233,5 +234,3 @@ def xls2html(filepath, output):
         f.write(six.binary_type(html.encode('utf-8')))
 
 
-if __name__ == '__main__':
-    xls2html(sys.argv[1], sys.argv[2])
