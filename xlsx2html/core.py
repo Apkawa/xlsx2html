@@ -6,23 +6,49 @@ import sys
 import openpyxl
 import six
 
+DEFAULT_BORDER_STYLE = {
+    'style': 'solid',
+    'width': '1px',
+}
+
 BORDER_STYLES = {
-    'dashDot': {},
-    'dashDotDot': {},
-    'dashed': {},
-    'dotted': {},
-    'double': {},
-    'hair': {},
+    'dashDot': None,
+    'dashDotDot': None,
+    'dashed': {
+        'style': 'dashed',
+    },
+    'dotted': {
+        'style': 'dotted',
+    },
+    'double': {
+        'style': 'double',
+    },
+    'hair': None,
     'medium': {
         'style': 'solid',
         'width': '2px',
     },
-    'mediumDashDot': {},
-    'mediumDashDotDot': {},
-    'mediumDashed': {},
-    'slantDashDot': {},
-    'thick': {},
-    'thin': {},
+    'mediumDashDot': {
+        'style': 'solid',
+        'width': '2px',
+    },
+    'mediumDashDotDot': {
+        'style': 'solid',
+        'width': '2px',
+    },
+    'mediumDashed': {
+        'width': '2px',
+        'style': 'dashed',
+    },
+    'slantDashDot': None,
+    'thick': {
+        'style': 'solid',
+        'width': '1px',
+    },
+    'thin': {
+        'style': 'solid',
+        'width': '1px',
+    },
 }
 
 
@@ -34,14 +60,29 @@ def render_inline_styles(styles):
     return ';'.join(["%s: %s" % a for a in sorted(styles.items(), key=lambda a: a[0])])
 
 
+def normalize_color(rgb):
+    #TODO RGBA
+    return "#" + rgb[2:]
+
+
 def get_border_style_from_cell(cell):
     h_styles = {}
     for b_dir in ['right', 'left', 'top', 'bottom']:
         b_s = getattr(cell.border, b_dir)
         if not b_s:
             continue
-        for k, v in BORDER_STYLES.get(b_s.style, {}).items():
+        border_style = BORDER_STYLES.get(b_s.style)
+        if border_style is None and b_s.style:
+            border_style = DEFAULT_BORDER_STYLE
+
+        if not border_style:
+            continue
+
+        for k, v in border_style.items():
             h_styles['border-%s-%s' % (b_dir, k)] = v
+        if b_s.color:
+            h_styles['border-%s-color' % (b_dir)] = normalize_color(b_s.color.rgb)
+
     return h_styles
 
 
@@ -66,10 +107,10 @@ def get_styles_from_cell(cell, merged_cell_map=None):
         h_styles['text-align'] = cell.alignment.horizontal
     h_styles['font-size'] = "%spx" % cell.font.sz
     if cell.font.color.rgb:
-        h_styles['color'] = "#" + cell.font.color.rgb[2:]
+        h_styles['color'] = normalize_color(cell.font.color.rgb)
     if cell.fill.patternType == 'solid':
         #TODO patternType != 'solid'
-        h_styles['background-color'] = '#' + cell.fill.fgColor.rgb[2:]
+        h_styles['background-color'] = normalize_color(cell.fill.fgColor.rgb)
 
     if cell.font.b:
         h_styles['font-weight'] = 'bold'
