@@ -1,3 +1,6 @@
+.. image:: https://travis-ci.org/Apkawa/xlsx2html.svg?branch=master
+    :target: https://travis-ci.org/Apkawa/xlsx2html
+
 xlsx2html
 =========
 
