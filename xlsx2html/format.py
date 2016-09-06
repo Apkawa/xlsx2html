@@ -1,9 +1,53 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
+from decimal import Decimal
+
 import re
 from babel import Locale
-from babel.numbers import NumberPattern, number_re, parse_grouping, LC_NUMERIC
+from babel.numbers import (
+    NumberPattern,
+    number_re,
+    parse_grouping,
+    LC_NUMERIC
+)
 
 CLEAN_RE = re.compile(r'[*-]')
+CLEAN_CURRENCY_RE = re.compile(r'\[\$(.+?)(:?-[\d]+|)\]')
+COLOR_FORMAT = re.compile(r'\[([A-Z]+)\]')
+
+
+class ColorNumberPattern(NumberPattern):
+    def __init__(self, *args, **kwargs):
+        super(ColorNumberPattern, self).__init__(*args, **kwargs)
+        self.pos_color = self.neg_color = None
+        try:
+            self.pos_color = COLOR_FORMAT.findall(self.prefix[0])[0]
+        except IndexError:
+            pass
+        try:
+            self.neg_color = COLOR_FORMAT.findall(self.prefix[1])[0]
+        except IndexError:
+            pass
+
+        self.prefix = [COLOR_FORMAT.sub('', p) for p in self.prefix]
+
+    def apply(self, value, locale, currency=None, force_frac=None):
+        formatted = super(ColorNumberPattern, self).apply(value, locale, currency, force_frac)
+        return self.apply_color(value, formatted)
+
+    def apply_color(self, value, formatted):
+        if not isinstance(value, Decimal):
+            value = Decimal(str(value))
+        value = value.scaleb(self.scale)
+        is_negative = int(value.is_signed())
+        template = '<span style="color: {color}">{value}</span>'
+        if is_negative and self.neg_color:
+            return template.format(color=self.neg_color, value=formatted)
+        if not is_negative and self.pos_color:
+            return template.format(color=self.pos_color, value=formatted)
+        return formatted
+
 
 def parse_pattern(pattern):
     """Parse number format patterns"""
@@ -17,6 +61,7 @@ def parse_pattern(pattern):
         return rv.groups()
 
     # Do we have a negative subpattern?
+    pattern = CLEAN_CURRENCY_RE.sub('\\1', pattern.replace('\\', ''))
     pattern = CLEAN_RE.sub('', pattern).strip().replace('_', ' ')
     if ';' in pattern:
         pattern, neg_pattern = pattern.split(';', 1)
@@ -25,13 +70,12 @@ def parse_pattern(pattern):
         pos_prefix, number, pos_suffix = _match_number(pattern)
         neg_prefix, _, neg_suffix = _match_number(neg_pattern)
         # TODO Do not remove from neg prefix
-
         neg_prefix = '-' + neg_prefix
-
     else:
         pos_prefix, number, pos_suffix = _match_number(pattern)
         neg_prefix = '-' + pos_prefix
         neg_suffix = pos_suffix
+
     if 'E' in number:
         number, exp = number.split('E', 1)
     else:
@@ -72,10 +116,11 @@ def parse_pattern(pattern):
         exp_plus = None
         exp_prec = None
     grouping = parse_grouping(integer)
-    return NumberPattern(pattern, (pos_prefix, neg_prefix),
+    number_pattern = ColorNumberPattern(pattern, (pos_prefix, neg_prefix),
         (pos_suffix, neg_suffix), grouping,
         int_prec, frac_prec,
         exp_prec, exp_plus)
+    return number_pattern
 
 
 def format_decimal(number, format=None, locale=LC_NUMERIC):
