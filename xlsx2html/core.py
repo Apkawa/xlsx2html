@@ -6,6 +6,8 @@ import sys
 import openpyxl
 import six
 
+from format import  format_decimal
+
 DEFAULT_BORDER_STYLE = {
     'style': 'solid',
     'width': '1px',
@@ -51,6 +53,13 @@ BORDER_STYLES = {
     },
 }
 
+def format_cell(cell):
+    value = cell.value
+    formatted_value = value or '&nbsp;'
+    if isinstance(value, six.integer_types) or isinstance(value, float) and cell.number_format:
+        if cell.number_format.lower() != 'general':
+            formatted_value = format_decimal(value, cell.number_format, locale='ru')
+    return formatted_value
 
 def render_attrs(attrs):
     return ' '.join(["%s=%s" % a for a in sorted(attrs.items(), key=lambda a: a[0])])
@@ -61,7 +70,7 @@ def render_inline_styles(styles):
 
 
 def normalize_color(rgb):
-    #TODO RGBA
+    # TODO RGBA
     return "#" + rgb[2:]
 
 
@@ -109,7 +118,7 @@ def get_styles_from_cell(cell, merged_cell_map=None):
     if cell.font.color.rgb:
         h_styles['color'] = normalize_color(cell.font.color.rgb)
     if cell.fill.patternType == 'solid':
-        #TODO patternType != 'solid'
+        # TODO patternType != 'solid'
         h_styles['background-color'] = normalize_color(cell.fill.fgColor.rgb)
 
     if cell.font.b:
@@ -156,8 +165,10 @@ def worksheet_to_data(ws):
             if row_dim.customHeight:
                 height = round(row_dim.height, 2)
 
+
             cell_data = {
-                'value': cell.value or '&nbsp;',
+                'value': cell.value,
+                'formatted_value': format_cell(cell),
                 'attrs': {},
                 'col-width': 96 * (width),
                 'style': {
@@ -186,7 +197,7 @@ def render_table(data):
             html.append('</colgroup>')
         trow = ['<tr>']
         for col in row:
-            trow.append('<td {attrs_str} style="{styles_str}">{value}</td>'.format(
+            trow.append('<td {attrs_str} style="{styles_str}">{formatted_value}</td>'.format(
                 attrs_str=render_attrs(col['attrs']),
                 styles_str=render_inline_styles(col['style']),
                 **col))
