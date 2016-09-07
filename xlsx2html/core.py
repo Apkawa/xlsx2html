@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 import sys
 
 import openpyxl
+import re
+from openpyxl.styles.colors import COLOR_INDEX
 import six
 
 from .format import format_decimal
@@ -68,12 +70,21 @@ def render_attrs(attrs):
 
 
 def render_inline_styles(styles):
-    return ';'.join(["%s: %s" % a for a in sorted(styles.items(), key=lambda a: a[0])])
+    return ';'.join(["%s: %s" % a for a in sorted(styles.items(), key=lambda a: a[0]) if a[1] is not None])
 
 
-def normalize_color(rgb):
+def normalize_color(color):
     # TODO RGBA
-    return "#" + rgb[2:]
+    rgb = None
+    if color.type == 'rgb':
+        rgb = color.rgb
+    if color.type == 'indexed':
+        rgb = COLOR_INDEX[color.indexed]
+        if not re.match(r'^\d+$', rgb):
+            rgb = '00000000'
+    if rgb:
+        return '#' + rgb[2:]
+    return None
 
 
 def get_border_style_from_cell(cell):
@@ -92,7 +103,7 @@ def get_border_style_from_cell(cell):
         for k, v in border_style.items():
             h_styles['border-%s-%s' % (b_dir, k)] = v
         if b_s.color:
-            h_styles['border-%s-color' % (b_dir)] = normalize_color(b_s.color.rgb)
+            h_styles['border-%s-color' % (b_dir)] = normalize_color(b_s.color)
 
     return h_styles
 
@@ -118,10 +129,10 @@ def get_styles_from_cell(cell, merged_cell_map=None):
         h_styles['text-align'] = cell.alignment.horizontal
     h_styles['font-size'] = "%spx" % cell.font.sz
     if cell.font.color.rgb:
-        h_styles['color'] = normalize_color(cell.font.color.rgb)
+        h_styles['color'] = normalize_color(cell.font.color)
     if cell.fill.patternType == 'solid':
         # TODO patternType != 'solid'
-        h_styles['background-color'] = normalize_color(cell.fill.fgColor.rgb)
+        h_styles['background-color'] = normalize_color(cell.fill.fgColor)
 
     if cell.font.b:
         h_styles['font-weight'] = 'bold'
