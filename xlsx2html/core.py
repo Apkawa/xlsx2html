@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import sys
-
 import openpyxl
-import re
-from openpyxl.styles.colors import COLOR_INDEX
 import six
+from openpyxl.styles.colors import COLOR_INDEX, aRGB_REGEX
 
-from .format import format_decimal
+from xlsx2html.format import format_cell
 
 DEFAULT_BORDER_STYLE = {
     'style': 'solid',
@@ -56,15 +53,6 @@ BORDER_STYLES = {
 }
 
 
-def format_cell(cell):
-    value = cell.value
-    formatted_value = value or '&nbsp;'
-    if isinstance(value, six.integer_types) or isinstance(value, float) and cell.number_format:
-        if cell.number_format.lower() != 'general':
-            formatted_value = format_decimal(value, cell.number_format, locale='ru')
-    return formatted_value
-
-
 def render_attrs(attrs):
     return ' '.join(["%s=%s" % a for a in sorted(attrs.items(), key=lambda a: a[0])])
 
@@ -80,7 +68,8 @@ def normalize_color(color):
         rgb = color.rgb
     if color.type == 'indexed':
         rgb = COLOR_INDEX[color.indexed]
-        if not re.match(r'^\d+$', rgb):
+        if not aRGB_REGEX.match(rgb):
+            # TODO system fg or bg
             rgb = '00000000'
     if rgb:
         return '#' + rgb[2:]

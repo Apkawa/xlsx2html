@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import datetime
 from decimal import Decimal
 
 import re
+import six
 from babel import Locale
+from babel.dates import format_datetime, format_date, format_time, LC_TIME
 from babel.numbers import (
     NumberPattern,
     number_re,
@@ -15,6 +18,39 @@ from babel.numbers import (
 CLEAN_RE = re.compile(r'[*-]')
 CLEAN_CURRENCY_RE = re.compile(r'\[\$(.+?)(:?-[\d]+|)\]')
 COLOR_FORMAT = re.compile(r'\[([A-Z]+)\]')
+
+TIME_REPLACES = {
+    'DD': 'dd',
+    'MM': 'm',
+    'HH': 'H',
+    'SS': 's',
+    'AM/PM': 'a'
+}
+
+DATE_REPLACES = {
+    'DD': 'dd',
+    'YYYY': 'yyyy',
+    'YY': 'yy',
+
+}
+
+
+def normalize_date_format(_format):
+    for f, to in DATE_REPLACES.items():
+        _format = _format.replace(f, to)
+    return _format
+
+
+def normalize_time_format(_format):
+    for f, to in TIME_REPLACES.items():
+        _format = _format.replace(f, to)
+    return _format.replace('\\', '')
+
+
+def normalize_datetime_format(_format):
+    parts = _format.split('\\')
+    parts = [nf(p) for p, nf in zip(parts, [normalize_date_format, normalize_time_format])]
+    return ''.join(parts)
 
 
 class ColorNumberPattern(NumberPattern):
@@ -152,3 +188,27 @@ def format_decimal(number, format=None, locale=LC_NUMERIC):
         format = locale.decimal_formats.get(format)
     pattern = parse_pattern(format)
     return pattern.apply(number, locale)
+
+
+def format_cell(cell, locale=None):
+    value = cell.value
+    formatted_value = value or '&nbsp;'
+    number_format = cell.number_format
+    if not number_format:
+        return formatted_value
+    if isinstance(value, six.integer_types) or isinstance(value, float):
+        if number_format.lower() != 'general':
+            locale = locale or LC_NUMERIC
+            formatted_value = format_decimal(value, number_format, locale=locale)
+
+    locale = locale or LC_TIME
+    if type(value) == datetime.date:
+        number_format = normalize_date_format(number_format)
+        formatted_value = format_date(value, number_format, locale=locale)
+    elif type(value) == datetime.datetime:
+        number_format = normalize_datetime_format(number_format)
+        formatted_value = format_datetime(value, number_format, locale=locale)
+    elif type(value) == datetime.time:
+        number_format = normalize_time_format(number_format)
+        formatted_value = format_time(value, number_format, locale=locale)
+    return formatted_value
