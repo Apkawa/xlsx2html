@@ -116,19 +116,20 @@ def get_styles_from_cell(cell, merged_cell_map=None):
 
     if cell.alignment.horizontal:
         h_styles['text-align'] = cell.alignment.horizontal
-    h_styles['font-size'] = "%spx" % cell.font.sz
-    if cell.font.color.rgb:
-        h_styles['color'] = normalize_color(cell.font.color)
+
     if cell.fill.patternType == 'solid':
         # TODO patternType != 'solid'
         h_styles['background-color'] = normalize_color(cell.fill.fgColor)
-
-    if cell.font.b:
-        h_styles['font-weight'] = 'bold'
-    if cell.font.i:
-        h_styles['font-style'] = 'italic'
-    if cell.font.u:
-        h_styles['font-decoration'] = 'underline'
+    if cell.font:
+        h_styles['font-size'] = "%spx" % cell.font.sz
+        if cell.font.color:
+            h_styles['color'] = normalize_color(cell.font.color)
+        if cell.font.b:
+            h_styles['font-weight'] = 'bold'
+        if cell.font.i:
+            h_styles['font-style'] = 'italic'
+        if cell.font.u:
+            h_styles['font-decoration'] = 'underline'
     return h_styles
 
 
@@ -149,21 +150,30 @@ def worksheet_to_data(ws):
         }
         exclded_cells.remove(m_cell.coordinate)
 
+    max_col_number = 0
+
     data_list = []
-    for row in ws.iter_rows():
+    for row_i, row in enumerate(ws.iter_rows()):
         data_row = []
         data_list.append(data_row)
-        for cell in row:
+        for col_i, cell in enumerate(row):
             col_dim = ws.column_dimensions[cell.column]
             row_dim = ws.row_dimensions[cell.row]
+
+            width = 0.89
+            if col_dim.customWidth:
+                width = round(col_dim.width / 10., 2)
+
+            col_width = 96 * width
+
             if cell.coordinate in exclded_cells or row_dim.hidden or col_dim.hidden:
                 continue
 
-            width = 0.89
+            if col_i > max_col_number:
+                max_col_number = col_i
+
             height = 19
 
-            if col_dim.customWidth:
-                width = round(col_dim.width / 10., 2)
             if row_dim.customHeight:
                 height = round(row_dim.height, 2)
 
@@ -171,7 +181,7 @@ def worksheet_to_data(ws):
                 'value': cell.value,
                 'formatted_value': format_cell(cell),
                 'attrs': {},
-                'col-width': 96 * (width),
+                'col-width': col_width,
                 'style': {
                     "width": "{}in".format(width),
                     "height": "{}px".format(height),
@@ -183,19 +193,41 @@ def worksheet_to_data(ws):
 
             cell_data['style'].update(get_styles_from_cell(cell, merged_cell_info))
             data_row.append(cell_data)
-    return data_list
+
+    col_list = []
+    max_col_number += 1
+    column_dimensions = sorted(ws.column_dimensions.items(), key=lambda (i, d): i)
+    for col_i, col_dim in column_dimensions:
+        if not all([col_dim.min, col_dim.max]):
+            continue
+        width = 0.89
+        if col_dim.customWidth:
+            width = round(col_dim.width / 10., 2)
+        col_width = 96 * width
+
+        for i in xrange((col_dim.max - col_dim.min) + 1):
+            max_col_number -= 1
+            col_list.append({"col-width": col_width})
+            if max_col_number < 0:
+                break
+    return {'rows': data_list, 'cols': col_list}
 
 
 def render_table(data):
     html = [
-        '<table  style="border-collapse: collapse" border="0" cellspacing="0" cellpadding="0">'
+        '<table  '
+        'style="border-collapse: collapse" '
+        'border="0" '
+        'cellspacing="0" '
+        'cellpadding="0">'
+        '<colgroup>'
     ]
-    for i, row in enumerate(data):
-        if i == 0:
-            html.append('<colgroup>')
-            for col in row:
-                html.append('<col width="%s">' % int(col['col-width']))
-            html.append('</colgroup>')
+
+    for col in data['cols']:
+        html.append('<col width="%s">' % int(col['col-width']))
+    html.append('</colgroup>')
+
+    for i, row in enumerate(data['rows']):
         trow = ['<tr>']
         for col in row:
             trow.append('<td {attrs_str} style="{styles_str}">{formatted_value}</td>'.format(
@@ -232,5 +264,3 @@ def xls2html(filepath, output):
 
     with open(output, 'wb') as f:
         f.write(six.binary_type(html.encode('utf-8')))
-
-
