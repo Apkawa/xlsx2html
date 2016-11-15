@@ -27,7 +27,7 @@ setup(
     author="Apkawa",
     author_email='apkawa@gmail.com',
     packages=[package for package in find_packages() if package.startswith(project_name)],
-    install_requires=['six', 'openpyxl'],
+    install_requires=['six', 'openpyxl==2.4.0'],
     zip_safe=False,
     include_package_data=True,
     classifiers=[
@@ -40,6 +40,6 @@ setup(
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
     ],
 )

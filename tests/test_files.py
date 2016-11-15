@@ -18,9 +18,14 @@ class XLS2HTMLTestCase(TestCase):
         self.expect_result = open(os.path.join(FIXTURES_ROOT, 'example.html')).read()
         self.tmp_file = tempfile.mktemp(suffix='xls2html_')
 
+
     def test_xls2html(self):
         xls2html(self.xlsx_file, self.tmp_file)
         result_html = open(self.tmp_file).read()
+
+        # expect_result_file = open(os.path.join(FIXTURES_ROOT, 'example.html'), 'wb')
+        # expect_result_file.write(result_html)
+
         self.assertEqual(result_html, self.expect_result)
 
 
