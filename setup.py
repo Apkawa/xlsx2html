@@ -9,7 +9,7 @@ App for Django featuring improved form base classes.
 
 project_name = 'xlsx2html'
 
-version = '0.1.1'
+version = '0.1.2'
 
 ROOT = os.path.dirname(__file__)
 
@@ -27,7 +27,7 @@ setup(
     author="Apkawa",
     author_email='apkawa@gmail.com',
     packages=[package for package in find_packages() if package.startswith(project_name)],
-    install_requires=['six', 'openpyxl==2.4.0'],
+    install_requires=['six', 'openpyxl==2.4.0', 'babel>=2.3.4'],
     zip_safe=False,
     include_package_data=True,
     classifiers=[
