@@ -196,7 +196,9 @@ def worksheet_to_data(ws):
 
     col_list = []
     max_col_number += 1
-    column_dimensions = sorted(ws.column_dimensions.items(), key=lambda (i, d): i)
+
+    column_dimensions = sorted(ws.column_dimensions.items(), key=lambda d: d[0])
+
     for col_i, col_dim in column_dimensions:
         if not all([col_dim.min, col_dim.max]):
             continue
@@ -205,7 +207,7 @@ def worksheet_to_data(ws):
             width = round(col_dim.width / 10., 2)
         col_width = 96 * width
 
-        for i in xrange((col_dim.max - col_dim.min) + 1):
+        for i in six.moves.range((col_dim.max - col_dim.min) + 1):
             max_col_number -= 1
             col_list.append({"col-width": col_width})
             if max_col_number < 0:

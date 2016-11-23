@@ -9,7 +9,7 @@ App for Django featuring improved form base classes.
 
 project_name = 'xlsx2html'
 
-version = '0.1.2'
+version = '0.1.3'
 
 ROOT = os.path.dirname(__file__)
 
