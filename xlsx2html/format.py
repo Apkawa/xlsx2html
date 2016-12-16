@@ -33,6 +33,14 @@ DATE_REPLACES = {
     'YY': 'yy',
 
 }
+# http://unicode.org/reports/tr35/tr35-dates.html#Date_Format_Patterns
+FIX_BUILTIN_FORMATS = {
+    14: 'MM-dd-yy',
+    15: 'd-MMM-yy',
+    16: 'd-MMM',
+    17: 'MMM-yy',
+    22: 'M/d/yy h:mm',
+}
 
 
 def normalize_date_format(_format):
@@ -202,8 +210,14 @@ def format_cell(cell, locale=None):
             formatted_value = format_decimal(value, number_format, locale=locale)
 
     locale = locale or LC_TIME
+
+    # Possible problem with dd-mmm and more
+    number_format = FIX_BUILTIN_FORMATS.get(cell._style.numFmtId, number_format)
+    number_format = number_format.split(';')[0]
+
     if type(value) == datetime.date:
         number_format = normalize_date_format(number_format)
+
         formatted_value = format_date(value, number_format, locale=locale)
     elif type(value) == datetime.datetime:
         number_format = normalize_datetime_format(number_format)
