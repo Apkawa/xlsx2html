@@ -133,7 +133,7 @@ def get_styles_from_cell(cell, merged_cell_map=None):
     return h_styles
 
 
-def worksheet_to_data(ws):
+def worksheet_to_data(ws, locale=None):
     merged_cell_map = {}
     exclded_cells = set(ws.merged_cells)
 
@@ -179,7 +179,7 @@ def worksheet_to_data(ws):
 
             cell_data = {
                 'value': cell.value,
-                'formatted_value': format_cell(cell),
+                'formatted_value': format_cell(cell, locale=locale),
                 'attrs': {},
                 'col-width': col_width,
                 'style': {
@@ -261,7 +261,7 @@ def render_data_to_html(data):
 
 def xls2html(filepath, output):
     ws = openpyxl.load_workbook(filepath, data_only=True).active
-    data = worksheet_to_data(ws)
+    data = worksheet_to_data(ws, locale='ru')
     html = render_data_to_html(data)
 
     with open(output, 'wb') as f:
