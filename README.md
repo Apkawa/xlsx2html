@@ -23,3 +23,14 @@ xlsx2html('path/to/example.xlsx', 'path/to/output.html')
 ```
 
 
+# Contributors
+```bash
+pip install -r requirements.txt
+pytest # run tests
+tox # run test matrix
+```
+
+## publish
+```bash
+python setup.py sdist upload -r pypi
+```

@@ -7,7 +7,7 @@ __doc__ = """A simple export from xlsx format to html tables with keep cell form
 
 project_name = 'xlsx2html'
 
-version = '0.1.4'
+version = '0.1.5'
 
 ROOT = os.path.dirname(__file__)
 
