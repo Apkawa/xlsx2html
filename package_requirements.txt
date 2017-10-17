@@ -1,0 +1,4 @@
+six
+openpyxl>=2.4.8
+babel>=2.3.4
+pypandoc

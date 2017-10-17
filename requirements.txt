@@ -1,5 +1,2 @@
-six
-openpyxl>=2.4.8
-babel>=2.3.4
-pypandoc
-twine
+-r package_requirements.txt
+-r test_requirements.txt
