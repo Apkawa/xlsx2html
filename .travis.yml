@@ -7,7 +7,8 @@ python:
     - "3.5"
     - "3.6"
     - "nightly"
-install: pip install tox-travis python-coveralls
-script: tox -- -v --cov xlsx2html --cov-report term-missing
+install: pip install tox-travis python-coveralls codecov
+script: tox
 after_success:
-  - coveralls --data_file ./tests/.coverage
+  - coveralls
+  - codecov
