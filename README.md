@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/Apkawa/xlsx2html.svg?branch=master)](https://travis-ci.org/Apkawa/xlsx2html)
+[![Coverage Status](https://coveralls.io/repos/github/Apkawa/xlsx2html/badge.svg?branch=master)](https://coveralls.io/github/Apkawa/xlsx2html?branch=master)
 [![Requirements Status](https://requires.io/github/Apkawa/xlsx2html/requirements.svg?branch=master)](https://requires.io/github/Apkawa/django-multitype-file-field/requirements/?branch=master)
 [![PyPI](https://img.shields.io/pypi/pyversions/xlsx2html.svg)]()
 
