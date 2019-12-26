@@ -1,4 +1,0 @@
-tox>=2.3
-pytest
-pytest-cov
-flake8

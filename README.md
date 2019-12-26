@@ -1,8 +1,10 @@
+[![PyPi](https://img.shields.io/pypi/v/xlsx2html.svg)](https://pypi.python.org/pypi/xlsx2html)
 [![Build Status](https://travis-ci.org/Apkawa/xlsx2html.svg?branch=master)](https://travis-ci.org/Apkawa/xlsx2html)
-[![Coverage Status](https://coveralls.io/repos/github/Apkawa/xlsx2html/badge.svg?branch=master)](https://coveralls.io/github/Apkawa/xlsx2html?branch=master)
-[![codecov](https://codecov.io/gh/Apkawa/xlsx2html/branch/master/graph/badge.svg)](https://codecov.io/gh/Apkawa/xlsx2html)
-[![Requirements Status](https://requires.io/github/Apkawa/xlsx2html/requirements.svg?branch=master)](https://requires.io/github/Apkawa/django-multitype-file-field/requirements/?branch=master)
-[![PyPI](https://img.shields.io/pypi/pyversions/xlsx2html.svg)]()
+[![Codecov](https://codecov.io/gh/Apkawa/xlsx2html/branch/master/graph/badge.svg)](https://codecov.io/gh/Apkawa/xlsx2html)
+[![Requirements Status](https://requires.io/github/Apkawa/xlsx2html/requirements.svg?branch=master)](https://requires.io/github/Apkawa/xlsx2html/requirements/?branch=master)
+[![PyUP](https://pyup.io/repos/github/Apkawa/xlsx2html/shield.svg)](https://pyup.io/repos/github/Apkawa/xlsx2html)
+[![Python versions](https://img.shields.io/pypi/pyversions/xlsx2html.svg)]()
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 # xlsx2html
 

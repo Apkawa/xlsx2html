@@ -1,3 +1,16 @@
--r package_requirements.txt
--r test_requirements.txt
-pypandoc
+-e .
+# Build
+bumpversion==0.5.3
+wheel==0.33.6
+twine==3.1.1
+setuptools>=42
+# Test
+tox==3.14.2
+pytest>=4,<5
+pytest-flake8==1.0.4
+pytest-cov==2.8.1
+
+# Docs
+recommonmark==0.6.0
+Sphinx==2.3.0
+alabaster==0.7.12

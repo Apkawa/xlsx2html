@@ -135,7 +135,7 @@ def get_styles_from_cell(cell, merged_cell_map=None):
 
 def worksheet_to_data(ws, locale=None):
     merged_cell_map = {}
-    exclded_cells = set(ws.merged_cells)
+    excluded_cells = set(ws.merged_cells)
 
     for cell_range in ws.merged_cell_ranges:
         cell_range_list = list(ws[cell_range])
@@ -148,7 +148,7 @@ def worksheet_to_data(ws, locale=None):
             },
             'cells': [c for rows in cell_range_list for c in rows],
         }
-        exclded_cells.remove(m_cell.coordinate)
+        excluded_cells.remove(m_cell.coordinate)
 
     max_col_number = 0
 
@@ -166,7 +166,7 @@ def worksheet_to_data(ws, locale=None):
 
             col_width = 96 * width
 
-            if cell.coordinate in exclded_cells or row_dim.hidden or col_dim.hidden:
+            if cell.coordinate in excluded_cells or row_dim.hidden or col_dim.hidden:
                 continue
 
             if col_i > max_col_number:
@@ -259,9 +259,9 @@ def render_data_to_html(data):
     return html % render_table(data)
 
 
-def xlsx2html(filepath, output):
+def xlsx2html(filepath, output, locale='en'):
     ws = openpyxl.load_workbook(filepath, data_only=True).active
-    data = worksheet_to_data(ws, locale='ru')
+    data = worksheet_to_data(ws, locale=locale)
     html = render_data_to_html(data)
 
     with open(output, 'wb') as f:
