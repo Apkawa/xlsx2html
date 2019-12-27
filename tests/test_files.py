@@ -22,7 +22,7 @@ class XLS2HTMLTestCase(TestCase):
         self.expect_result = open(
             os.path.join(FIXTURES_ROOT, 'example.html')
         ).read()
-        self.tmp_file = tempfile.mktemp(suffix='xls2html_')
+        self.tmp_file = tempfile.mktemp(suffix='.html', prefix='xlsx2html_')
 
     def test_xls2html(self):
         xlsx2html(self.xlsx_file, self.tmp_file, locale='en')
