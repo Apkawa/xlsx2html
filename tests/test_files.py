@@ -25,9 +25,8 @@ class XLS2HTMLTestCase(TestCase):
         self.tmp_file = tempfile.mktemp(suffix='xls2html_')
 
     def test_xls2html(self):
-        xlsx2html(self.xlsx_file, self.tmp_file, locale='ru')
+        xlsx2html(self.xlsx_file, self.tmp_file, locale='en')
         result_html = open(self.tmp_file).read()
-
         self.assertEqual(result_html, self.expect_result)
 
     def tearDown(self):

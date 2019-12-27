@@ -2,12 +2,13 @@
 from __future__ import unicode_literals
 
 import datetime
+import re
 from decimal import Decimal
 
-import re
 import six
 from babel import Locale
-from babel.dates import format_datetime, format_date, format_time, LC_TIME
+from babel import dates as babel_dates
+from babel.dates import LC_TIME
 from babel.numbers import (
     NumberPattern,
     number_re,
@@ -19,20 +20,39 @@ CLEAN_RE = re.compile(r'[*-]')
 CLEAN_CURRENCY_RE = re.compile(r'\[\$(.+?)(:?-[\d]+|)\]')
 COLOR_FORMAT = re.compile(r'\[([A-Z]+)\]')
 
-TIME_REPLACES = {
-    'DD': 'dd',
-    'MM': 'm',
-    'HH': 'H',
-    'SS': 's',
-    'AM/PM': 'a'
-}
 
 DATE_REPLACES = {
     'DD': 'dd',
     'YYYY': 'yyyy',
     'YY': 'yy',
-
 }
+RE_TIME = re.compile(
+    r"""
+        \b
+        (?P<hours>[H]{1,2}) 
+        .? 
+        (?P<minutes>[M]{1,2})
+        (?:
+            .? 
+            (?P<seconds>[S]{1,2})
+            |
+        )
+        (?:
+            .+?
+            (?P<h12>AM/PM)
+            |
+        )
+        \b
+        """,
+    re.VERBOSE
+
+)
+FIX_TIME_REPLACES = {
+    r'\b([H]{1,2}).?([M]{1,2}).?([S]{1,2}).+?(AM/PM)\b': r'hh\1m\2s\3a',
+    r'\bHH(.?)MM(.?)SS\b': r'H\1m\2s',
+    r'AM/PM': 'a'
+}
+
 # http://unicode.org/reports/tr35/tr35-dates.html#Date_Format_Patterns
 FIX_BUILTIN_FORMATS = {
     14: 'MM-dd-yy',
@@ -50,15 +70,38 @@ def normalize_date_format(_format):
 
 
 def normalize_time_format(_format):
-    for f, to in TIME_REPLACES.items():
-        _format = _format.replace(f, to)
+    def replace_time(m):
+        groups = m.groupdict()
+        text = m.group(0).lower()
+        if groups.get('h12'):
+            text = text.replace(groups['h12'].lower(), 'a')
+        else:
+            text = text.replace('h', 'H')
+        return text
+
+    _format = RE_TIME.sub(replace_time, _format)
     return _format.replace('\\', '')
 
 
 def normalize_datetime_format(_format):
-    parts = _format.split('\\')
-    parts = [nf(p) for p, nf in zip(parts, [normalize_date_format, normalize_time_format])]
-    return ''.join(parts)
+    for fn in [normalize_time_format, normalize_date_format]:
+        _format = fn(_format)
+    return _format.replace('\\', '')
+
+
+def format_date(date, fmt, locale=LC_TIME):
+    fmt = normalize_date_format(fmt)
+    return babel_dates.format_date(date, fmt, locale)
+
+
+def format_datetime(date, fmt, locale=LC_TIME, tzinfo=None):
+    fmt = normalize_datetime_format(fmt)
+    return babel_dates.format_datetime(date, fmt, locale=locale, tzinfo=tzinfo)
+
+
+def format_time(date, fmt, locale=LC_TIME, tzinfo=None):
+    fmt = normalize_time_format(fmt)
+    return babel_dates.format_time(date, fmt, locale=locale, tzinfo=tzinfo)
 
 
 class ColorNumberPattern(NumberPattern):
@@ -161,9 +204,9 @@ def parse_pattern(pattern):
         exp_prec = None
     grouping = parse_grouping(integer)
     number_pattern = ColorNumberPattern(pattern, (pos_prefix, neg_prefix),
-        (pos_suffix, neg_suffix), grouping,
-        int_prec, frac_prec,
-        exp_prec, exp_plus)
+                                        (pos_suffix, neg_suffix), grouping,
+                                        int_prec, frac_prec,
+                                        exp_prec, exp_plus)
     return number_pattern
 
 
@@ -216,13 +259,9 @@ def format_cell(cell, locale=None):
     number_format = number_format.split(';')[0]
 
     if type(value) == datetime.date:
-        number_format = normalize_date_format(number_format)
-
         formatted_value = format_date(value, number_format, locale=locale)
     elif type(value) == datetime.datetime:
-        number_format = normalize_datetime_format(number_format)
         formatted_value = format_datetime(value, number_format, locale=locale)
     elif type(value) == datetime.time:
-        number_format = normalize_time_format(number_format)
         formatted_value = format_time(value, number_format, locale=locale)
     return formatted_value

@@ -2,7 +2,7 @@
 # Build
 bumpversion==0.5.3
 wheel==0.33.6
-twine==3.1.1
+twine>=1.15.0
 setuptools>=42
 # Test
 tox==3.14.2

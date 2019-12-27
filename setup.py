@@ -57,7 +57,7 @@ setup(
         'six',
         # TODO actualize version
         'openpyxl>=2.4.8,<2.4.9',
-        'babel>=2.3.4,<2.5.1',
+        'babel>=2.3.4',
     ],
     zip_safe=False,
     include_package_data=True,
