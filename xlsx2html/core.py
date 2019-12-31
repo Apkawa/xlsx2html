@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import openpyxl
 import six
+import openpyxl
 from openpyxl.styles.colors import COLOR_INDEX, aRGB_REGEX
+from openpyxl.utils import rows_from_range
 
+from xlsx2html.compat import OPENPYXL_24
 from xlsx2html.format import format_cell
 
 DEFAULT_BORDER_STYLE = {
@@ -141,9 +143,18 @@ def get_styles_from_cell(cell, merged_cell_map=None):
 
 def worksheet_to_data(ws, locale=None):
     merged_cell_map = {}
-    excluded_cells = set(ws.merged_cells)
+    if OPENPYXL_24:
+        merged_cell_ranges = ws.merged_cell_ranges
+        excluded_cells = set(ws.merged_cells)
+    else:
+        merged_cell_ranges = [cell_range.coord for cell_range in ws.merged_cells.ranges]
+        excluded_cells = set([cell
+                              for cell_range in merged_cell_ranges
+                              for rows in rows_from_range(cell_range)
+                              for cell in rows
+                              ])
 
-    for cell_range in ws.merged_cell_ranges:
+    for cell_range in merged_cell_ranges:
         cell_range_list = list(ws[cell_range])
         m_cell = cell_range_list[0][0]
 

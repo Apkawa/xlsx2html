@@ -6,7 +6,23 @@ python:
     - "3.6"
     - "3.7"
     - "3.8"
+
+matrix:
+    fast_finish: true
+
+    include:
+        - env: TOXENV=flake8
+          python: 3.7
+        - env: TOXENV=py37-openpyxl24
+          python: 3.7
+
+    allow_failures:
+        - python: 2.7
+        - env: TOXENV=py37-openpyxl24
+          python: 3.7
+
 install: pip install tox-travis python-coveralls codecov
 script: tox -- --skip-webtest --cov xlsx2html --cov-report term-missing
+
 after_success:
-  - codecov
+  - codecov -e TOXENV

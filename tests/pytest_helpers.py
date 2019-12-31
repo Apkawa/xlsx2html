@@ -19,5 +19,3 @@ def get_test_info(request, suffix='', prefix=''):
         'test_name': test_name,
         'classname': classname,
     }
-
-

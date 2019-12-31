@@ -20,7 +20,6 @@ CLEAN_RE = re.compile(r'[*-]')
 CLEAN_CURRENCY_RE = re.compile(r'\[\$(.+?)(:?-[\d]+|)\]')
 COLOR_FORMAT = re.compile(r'\[([A-Z]+)\]')
 
-
 DATE_REPLACES = {
     'DD': 'dd',
     'YYYY': 'yyyy',
@@ -29,11 +28,11 @@ DATE_REPLACES = {
 RE_TIME = re.compile(
     r"""
         \b
-        (?P<hours>[H]{1,2}) 
-        .? 
+        (?P<hours>[H]{1,2})
+        .?
         (?P<minutes>[M]{1,2})
         (?:
-            .? 
+            .?
             (?P<seconds>[S]{1,2})
             |
         )

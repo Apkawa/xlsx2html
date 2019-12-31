@@ -22,7 +22,6 @@ def screenshot_reference_dir():
 
 @pytest.fixture(scope="function")
 def screenshot_match(browser, request, screenshot_reference_dir, splinter_screenshot_dir):
-
     def _factory(suffix='', threshold=0.00):
         test_info = get_test_info(request)
         reference_dir = os.path.join(screenshot_reference_dir, test_info['classname'])
@@ -30,8 +29,9 @@ def screenshot_match(browser, request, screenshot_reference_dir, splinter_screen
         reference_name = os.path.join(reference_dir,
                                       build_filename(test_info['test_name'],
                                                      suffix=suffix + '-reference.png'))
-        screenshot_name = os.path.join(screenshot_dir, build_filename(test_info['test_name'],
-                                                                      suffix=suffix + '-screenshot.png'))
+        screenshot_name = os.path.join(screenshot_dir,
+                                       build_filename(test_info['test_name'],
+                                                      suffix=suffix + '-screenshot.png'))
         diff_name = os.path.join(screenshot_dir, build_filename(test_info['test_name'],
                                                                 suffix=suffix + '-diff.png'))
 
@@ -45,9 +45,9 @@ def screenshot_match(browser, request, screenshot_reference_dir, splinter_screen
             os.makedirs(screenshot_dir)
         browser.driver.save_screenshot(screenshot_name)
         diff_ratio = diff(reference_name, screenshot_name,
-                    delete_diff_file=False,
-                    diff_img_file=diff_name,
-                    ignore_alpha=True)
+                          delete_diff_file=False,
+                          diff_img_file=diff_name,
+                          ignore_alpha=True)
         assert diff_ratio <= threshold, "Image not equals!"
 
         for f in [screenshot_name, diff_name]:
