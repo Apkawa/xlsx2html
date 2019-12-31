@@ -26,6 +26,12 @@ from xlsx2html import xlsx2html
 xlsx2html('path/to/example.xlsx', 'path/to/output.html')
 ```
 
+or from shell
+
+```bash
+python -m xlsx2html path/to/example.xlsx path/to/output.html
+```
+
 
 # Contributors
 ```bash
@@ -34,7 +40,12 @@ pytest # run tests
 tox # run test matrix
 ```
 
+## Shift version
+```bash 
+python setup.py bumpversion
+```
+
 ## publish
 ```bash
-python setup.py sdist upload -r pypi
+python setup.py publish
 ```
