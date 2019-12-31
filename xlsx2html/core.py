@@ -54,11 +54,16 @@ BORDER_STYLES = {
 
 
 def render_attrs(attrs):
+    if not attrs:
+        return ''
     return ' '.join(["%s=%s" % a for a in sorted(attrs.items(), key=lambda a: a[0])])
 
 
 def render_inline_styles(styles):
-    return ';'.join(["%s: %s" % a for a in sorted(styles.items(), key=lambda a: a[0]) if a[1] is not None])
+    if not styles:
+        return ''
+    return ';'.join(
+        ["%s: %s" % a for a in sorted(styles.items(), key=lambda a: a[0]) if a[1] is not None])
 
 
 def normalize_color(color):
@@ -109,7 +114,8 @@ def get_styles_from_cell(cell, merged_cell_map=None):
         for m_cell in merged_cell_map['cells']:
             b_styles.update(get_border_style_from_cell(m_cell))
 
-    for b_dir in ['border-right-style', 'border-left-style', 'border-top-style', 'border-bottom-style']:
+    for b_dir in ['border-right-style', 'border-left-style', 'border-top-style',
+                  'border-bottom-style']:
         if b_dir not in b_styles:
             b_styles[b_dir] = 'none'
     h_styles.update(b_styles)
@@ -157,16 +163,9 @@ def worksheet_to_data(ws, locale=None):
         data_row = []
         data_list.append(data_row)
         for col_i, cell in enumerate(row):
-            col_dim = ws.column_dimensions[cell.column]
             row_dim = ws.row_dimensions[cell.row]
 
-            width = 0.89
-            if col_dim.customWidth:
-                width = round(col_dim.width / 10., 2)
-
-            col_width = 96 * width
-
-            if cell.coordinate in excluded_cells or row_dim.hidden or col_dim.hidden:
+            if cell.coordinate in excluded_cells or row_dim.hidden:
                 continue
 
             if col_i > max_col_number:
@@ -178,12 +177,12 @@ def worksheet_to_data(ws, locale=None):
                 height = round(row_dim.height, 2)
 
             cell_data = {
+                'column': cell.column,
+                'row': cell.row,
                 'value': cell.value,
                 'formatted_value': format_cell(cell, locale=locale),
                 'attrs': {},
-                'col-width': col_width,
                 'style': {
-                    "width": "{}in".format(width),
                     "height": "{}px".format(height),
                 },
             }
@@ -207,9 +206,15 @@ def worksheet_to_data(ws, locale=None):
             width = round(col_dim.width / 10., 2)
         col_width = 96 * width
 
-        for i in six.moves.range((col_dim.max - col_dim.min) + 1):
+        for _ in six.moves.range((col_dim.max - col_dim.min) + 1):
             max_col_number -= 1
-            col_list.append({"col-width": col_width})
+            col_list.append({
+                'index': col_dim.index,
+                'hidden': col_dim.hidden,
+                'style': {
+                    "width": "{}in !important".format(col_width),
+                }
+            })
             if max_col_number < 0:
                 break
     return {'rows': data_list, 'cols': col_list}
@@ -224,18 +229,25 @@ def render_table(data):
         'cellpadding="0">'
         '<colgroup>'
     ]
-
+    hidden_columns = set()
     for col in data['cols']:
-        html.append('<col width="%s">' % int(col['col-width']))
+        if col['hidden']:
+            hidden_columns.add(col['index'])
+        html.append('<col {attrs} style="{styles}">'.format(
+            attrs=render_attrs(col.get('attrs')),
+            styles=render_inline_styles(col.get('style')),
+        ))
     html.append('</colgroup>')
 
     for i, row in enumerate(data['rows']):
         trow = ['<tr>']
-        for col in row:
+        for cell in row:
+            if cell['column'] in hidden_columns:
+                continue
             trow.append('<td {attrs_str} style="{styles_str}">{formatted_value}</td>'.format(
-                attrs_str=render_attrs(col['attrs']),
-                styles_str=render_inline_styles(col['style']),
-                **col))
+                attrs_str=render_attrs(cell['attrs']),
+                styles_str=render_inline_styles(cell['style']),
+                **cell))
 
         trow.append('</tr>')
         html.append('\n'.join(trow))

@@ -55,8 +55,7 @@ setup(
     python_requires='>=2.7, <4',
     install_requires=[
         'six',
-        # TODO actualize version to 3, and keep support <2.5
-        'openpyxl>=2.4.8,<2.5',
+        'openpyxl>=2.4.8',
         'babel>=2.3.4',
     ],
     zip_safe=False,

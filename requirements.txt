@@ -9,8 +9,10 @@ tox==3.14.2
 pytest>=4,<5
 pytest-flake8==1.0.4
 pytest-cov==2.8.1
-
+pytest-splinter==2.0.1
+chromedriver-binary==2.40.1
+diffimg==0.2.3
 # Docs
-recommonmark==0.6.0
-Sphinx==2.3.0
-alabaster==0.7.12
+recommonmark
+Sphinx
+alabaster
