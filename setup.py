@@ -28,7 +28,6 @@ if sys.argv[1] == 'bumpversion':
         part = 'patch'
 
     os.system("bumpversion --config-file setup.cfg %s" % part)
-    os.system("git push --tags")
     sys.exit()
 
 __doc__ = """A generic api for oauth2"""
