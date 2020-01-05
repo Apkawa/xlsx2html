@@ -34,7 +34,7 @@ if sys.argv[1] == 'bumpversion':
 __doc__ = """A generic api for oauth2"""
 
 project_name = 'xlsx2html'
-app_name = '{example_app}'
+app_name = 'xlsx2html'
 
 ROOT = os.path.dirname(__file__)
 
@@ -49,7 +49,7 @@ setup(
     description=__doc__,
     long_description=read('README.md'),
     long_description_content_type='text/markdown',
-    url="https://githib.com/Apkawa/%s" % project_name,
+    url="https://github.com/Apkawa/%s" % project_name,
     author="Apkawa",
     author_email='apkawa@gmail.com',
     packages=[package for package in find_packages() if package.startswith(app_name)],
