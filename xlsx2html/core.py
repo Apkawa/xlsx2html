@@ -228,7 +228,7 @@ def worksheet_to_data(ws, locale=None, fs=None):
                 'index': col_dim.index,
                 'hidden': col_dim.hidden,
                 'style': {
-                    "width": "{}in !important".format(col_width),
+                    "width": "{}px".format(col_width),
                 }
             })
             if max_col_number < 0:
