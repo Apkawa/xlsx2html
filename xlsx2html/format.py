@@ -245,7 +245,7 @@ def format_cell(cell, locale=None):
     formatted_value = value or '&nbsp;'
     number_format = cell.number_format
     if not number_format:
-        return formatted_value
+        return format_hyperlink(formatted_value, cell.hyperlink)
     if isinstance(value, six.integer_types) or isinstance(value, float):
         if number_format.lower() != 'general':
             locale = locale or LC_NUMERIC
@@ -263,4 +263,16 @@ def format_cell(cell, locale=None):
         formatted_value = format_datetime(value, number_format, locale=locale)
     elif type(value) == datetime.time:
         formatted_value = format_time(value, number_format, locale=locale)
-    return formatted_value
+    return format_hyperlink(formatted_value, cell.hyperlink)
+
+def format_hyperlink(value, hyperlink):
+    if hyperlink is None or hyperlink.target is None:
+        return value
+    else:
+        if hyperlink.location is not None:
+            href = "{}#{}".format(hyperlink.target, hyperlink.location)
+        else:
+            href = hyperlink.target
+
+        return "<a href=\"{}\">{}</a>".format(href, value)
+
