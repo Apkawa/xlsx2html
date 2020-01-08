@@ -240,12 +240,13 @@ def format_decimal(number, format=None, locale=LC_NUMERIC):
     return pattern.apply(number, locale)
 
 
-def format_cell(cell, locale=None):
+def format_cell(cell, locale=None, f_cell=None):
     value = cell.value
     formatted_value = value or '&nbsp;'
     number_format = cell.number_format
     if not number_format:
         return format_hyperlink(formatted_value, cell.hyperlink)
+
     if isinstance(value, six.integer_types) or isinstance(value, float):
         if number_format.lower() != 'general':
             locale = locale or LC_NUMERIC
@@ -263,16 +264,19 @@ def format_cell(cell, locale=None):
         formatted_value = format_datetime(value, number_format, locale=locale)
     elif type(value) == datetime.time:
         formatted_value = format_time(value, number_format, locale=locale)
-    return format_hyperlink(formatted_value, cell.hyperlink)
+    if cell.hyperlink:
+        return format_hyperlink(formatted_value, cell)
+    return formatted_value
 
-def format_hyperlink(value, hyperlink):
+
+def format_hyperlink(value, cell):
+    hyperlink = cell.hyperlink
     if hyperlink is None or hyperlink.target is None:
         return value
+
+    if hyperlink.location is not None:
+        href = "{}#{}".format(hyperlink.target, hyperlink.location)
     else:
-        if hyperlink.location is not None:
-            href = "{}#{}".format(hyperlink.target, hyperlink.location)
-        else:
-            href = hyperlink.target
+        href = hyperlink.target
 
-        return "<a href=\"{}\">{}</a>".format(href, value)
-
+    return '<a href="{href}">{value}</a>'.format(href=href, value=value)

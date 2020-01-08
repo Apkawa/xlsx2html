@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import six
+import io
+
 import openpyxl
+import six
 from openpyxl.styles.colors import COLOR_INDEX, aRGB_REGEX
 from openpyxl.utils import rows_from_range
 
@@ -141,7 +143,7 @@ def get_styles_from_cell(cell, merged_cell_map=None):
     return h_styles
 
 
-def worksheet_to_data(ws, locale=None):
+def worksheet_to_data(ws, locale=None, fs=None):
     merged_cell_map = {}
     if OPENPYXL_24:
         merged_cell_ranges = ws.merged_cell_ranges
@@ -187,11 +189,15 @@ def worksheet_to_data(ws, locale=None):
             if row_dim.customHeight:
                 height = round(row_dim.height, 2)
 
+            f_cell = None
+            if fs:
+                f_cell = fs[cell.coordinate]
+
             cell_data = {
                 'column': cell.column,
                 'row': cell.row,
                 'value': cell.value,
-                'formatted_value': format_cell(cell, locale=locale),
+                'formatted_value': format_cell(cell, locale=locale, f_cell=f_cell),
                 'attrs': {},
                 'style': {
                     "height": "{}px".format(height),
@@ -200,7 +206,6 @@ def worksheet_to_data(ws, locale=None):
             merged_cell_info = merged_cell_map.get(cell.coordinate, {})
             if merged_cell_info:
                 cell_data['attrs'].update(merged_cell_info['attrs'])
-
             cell_data['style'].update(get_styles_from_cell(cell, merged_cell_info))
             data_row.append(cell_data)
 
@@ -282,10 +287,31 @@ def render_data_to_html(data):
     return html % render_table(data)
 
 
-def xlsx2html(filepath, output, locale='en'):
-    ws = openpyxl.load_workbook(filepath, data_only=True).active
-    data = worksheet_to_data(ws, locale=locale)
+def get_sheet(wb, sheet):
+    ws = wb.active
+    if sheet is not None:
+        try:
+            ws = wb.get_sheet_by_name(sheet)
+        except KeyError:
+            ws = wb.worksheets[sheet]
+    return ws
+
+
+def xlsx2html(filepath, output=None, locale='en', sheet=None, parse_formula=False):
+    wb = openpyxl.load_workbook(filepath, data_only=True)
+    ws = get_sheet(wb, sheet)
+
+    fs = None
+    if parse_formula:
+        fb = openpyxl.load_workbook(filepath, data_only=False)
+        fs = get_sheet(fb, sheet)
+
+    data = worksheet_to_data(ws, locale=locale, fs=fs)
     html = render_data_to_html(data)
 
-    with open(output, 'wb') as f:
-        f.write(six.binary_type(html.encode('utf-8')))
+    if not output:
+        output = io.StringIO()
+    if isinstance(output, str):
+        output = open(output, 'w')
+    output.write(html)
+    return output
