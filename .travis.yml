@@ -7,7 +7,7 @@ python:
     - "3.7"
     - "3.8"
     - "3.9-dev"
-    - "python-nightly"
+    - "nightly"
 
 matrix:
     fast_finish: true
@@ -22,8 +22,8 @@ matrix:
         - env: TOXENV=py37-openpyxl24
           python: "3.7"
         - env: TOXENV=qa
-        - python: "python-3.9-dev"
-        - python: "python-nightly"
+        - python: "3.9-dev"
+        - python: "nightly"
 
 install: pip install tox-travis python-coveralls codecov
 script: tox
