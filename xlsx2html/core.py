@@ -143,6 +143,10 @@ def get_styles_from_cell(cell, merged_cell_map=None):
     return h_styles
 
 
+def get_cell_id(cell):
+    return '{}!{}'.format(cell.parent.title, cell.coordinate)
+
+
 def worksheet_to_data(ws, locale=None, fs=None):
     merged_cell_map = {}
     if OPENPYXL_24:
@@ -198,7 +202,9 @@ def worksheet_to_data(ws, locale=None, fs=None):
                 'row': cell.row,
                 'value': cell.value,
                 'formatted_value': format_cell(cell, locale=locale, f_cell=f_cell),
-                'attrs': {},
+                'attrs': {
+                    'id': get_cell_id(cell)
+                },
                 'style': {
                     "height": "{}px".format(height),
                 },
