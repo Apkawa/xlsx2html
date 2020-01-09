@@ -1,14 +1,7 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
-import datetime
 import re
 from decimal import Decimal
 
-import six
 from babel import Locale
-from babel import dates as babel_dates
-from babel.dates import LC_TIME
 from babel.numbers import (
     NumberPattern,
     number_re,
@@ -19,88 +12,6 @@ from babel.numbers import (
 CLEAN_RE = re.compile(r'[*-]')
 CLEAN_CURRENCY_RE = re.compile(r'\[\$(.+?)(:?-[\d]+|)\]')
 COLOR_FORMAT = re.compile(r'\[([A-Z]+)\]')
-
-DATE_REPLACES = {
-    'DD': 'dd',
-    'YYYY': 'yyyy',
-    'YY': 'yy',
-}
-RE_TIME = re.compile(
-    r"""
-        \b
-        (?P<hours>[H]{1,2})
-        .?
-        (?P<minutes>[M]{1,2})
-        (?:
-            .?
-            (?P<seconds>[S]{1,2})
-            |
-        )
-        (?:
-            .+?
-            (?P<h12>AM/PM)
-            |
-        )
-        \b
-        """,
-    re.VERBOSE
-
-)
-FIX_TIME_REPLACES = {
-    r'\b([H]{1,2}).?([M]{1,2}).?([S]{1,2}).+?(AM/PM)\b': r'hh\1m\2s\3a',
-    r'\bHH(.?)MM(.?)SS\b': r'H\1m\2s',
-    r'AM/PM': 'a'
-}
-
-# http://unicode.org/reports/tr35/tr35-dates.html#Date_Format_Patterns
-FIX_BUILTIN_FORMATS = {
-    14: 'MM-dd-yy',
-    15: 'd-MMM-yy',
-    16: 'd-MMM',
-    17: 'MMM-yy',
-    22: 'M/d/yy h:mm',
-}
-
-
-def normalize_date_format(_format):
-    for f, to in DATE_REPLACES.items():
-        _format = _format.replace(f, to)
-    return _format
-
-
-def normalize_time_format(_format):
-    def replace_time(m):
-        groups = m.groupdict()
-        text = m.group(0).lower()
-        if groups.get('h12'):
-            text = text.replace(groups['h12'].lower(), 'a')
-        else:
-            text = text.replace('h', 'H')
-        return text
-
-    _format = RE_TIME.sub(replace_time, _format)
-    return _format.replace('\\', '')
-
-
-def normalize_datetime_format(_format):
-    for fn in [normalize_time_format, normalize_date_format]:
-        _format = fn(_format)
-    return _format.replace('\\', '')
-
-
-def format_date(date, fmt, locale=LC_TIME):
-    fmt = normalize_date_format(fmt)
-    return babel_dates.format_date(date, fmt, locale)
-
-
-def format_datetime(date, fmt, locale=LC_TIME, tzinfo=None):
-    fmt = normalize_datetime_format(fmt)
-    return babel_dates.format_datetime(date, fmt, locale=locale, tzinfo=tzinfo)
-
-
-def format_time(date, fmt, locale=LC_TIME, tzinfo=None):
-    fmt = normalize_time_format(fmt)
-    return babel_dates.format_time(date, fmt, locale=locale, tzinfo=tzinfo)
 
 
 class ColorNumberPattern(NumberPattern):
@@ -238,45 +149,3 @@ def format_decimal(number, format=None, locale=LC_NUMERIC):
         format = locale.decimal_formats.get(format)
     pattern = parse_pattern(format)
     return pattern.apply(number, locale)
-
-
-def format_cell(cell, locale=None, f_cell=None):
-    value = cell.value
-    formatted_value = value or '&nbsp;'
-    number_format = cell.number_format
-    if not number_format:
-        return format_hyperlink(formatted_value, cell.hyperlink)
-
-    if isinstance(value, six.integer_types) or isinstance(value, float):
-        if number_format.lower() != 'general':
-            locale = locale or LC_NUMERIC
-            formatted_value = format_decimal(value, number_format, locale=locale)
-
-    locale = locale or LC_TIME
-
-    # Possible problem with dd-mmm and more
-    number_format = FIX_BUILTIN_FORMATS.get(cell._style.numFmtId, number_format)
-    number_format = number_format.split(';')[0]
-
-    if type(value) == datetime.date:
-        formatted_value = format_date(value, number_format, locale=locale)
-    elif type(value) == datetime.datetime:
-        formatted_value = format_datetime(value, number_format, locale=locale)
-    elif type(value) == datetime.time:
-        formatted_value = format_time(value, number_format, locale=locale)
-    if cell.hyperlink:
-        return format_hyperlink(formatted_value, cell)
-    return formatted_value
-
-
-def format_hyperlink(value, cell):
-    hyperlink = cell.hyperlink
-    if hyperlink is None or hyperlink.target is None:
-        return value
-
-    if hyperlink.location is not None:
-        href = "{}#{}".format(hyperlink.target, hyperlink.location)
-    else:
-        href = hyperlink.target
-
-    return '<a href="{href}">{value}</a>'.format(href=href, value=value)
