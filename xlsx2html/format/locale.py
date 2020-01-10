@@ -4,7 +4,14 @@ from babel import Locale, UnknownLocaleError
 
 from xlsx2html.constants import LCID_HEX_MAP
 
-LOCALE_FORMAT_RE = re.compile(r'\[\$([-0-9A-Fa-f][0-9A-Fa-f]{3})\]')
+LOCALE_FORMAT_RE = re.compile(r'''
+    \[
+    \$
+        (?:.+|)
+        -(?P<lcid>[0-9A-Fa-f]{3,4})
+    \]
+    '''
+    , re.VERBOSE)
 
 
 def parse_locale_code(code):
@@ -29,10 +36,10 @@ def extract_locale_from_format(fmt):
     """
     >>> extract_locale_from_format('[$-404]e/m/d')
     ('zh_Hant_TW', 'e/m/d')
-    >>> extract_locale_from_format('[$0404]e/m/d')
+    >>> extract_locale_from_format('[$USD-404]e/m/d')
     ('zh_Hant_TW', 'e/m/d')
-    >>> extract_locale_from_format('[$4404]e/m/d')
-    (None, 'e/m/d')
+    >>> extract_locale_from_format('[$$-404]#.00')
+    ('zh_Hant_TW', '#.00')
     >>> extract_locale_from_format('[RED]e/m/d')
     (None, '[RED]e/m/d')
     """
@@ -42,6 +49,7 @@ def extract_locale_from_format(fmt):
         return locale, fmt
 
     win_locale = m.group()
+    # todo keep currency
     new_locale = parse_locale_code(m.group(1))
     if new_locale:
         locale = new_locale
