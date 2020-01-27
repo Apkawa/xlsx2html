@@ -10,6 +10,7 @@ from babel.numbers import (
 )
 
 ASTERISK_CLEAN_RE = re.compile(r'[*]')
+QUESTION_MARK_RE = re.compile(r'\?')
 UNDERSCORE_RE = re.compile(r'_.')
 MINUS_CLEAN_RE = re.compile(r'[-]')
 CLEAN_CURRENCY_RE = re.compile(r'\[\$(.+?)(:?-[\d]+|)\]')
@@ -74,6 +75,16 @@ class PatternParser:
                     break
             return min, max
 
+        def generate_color_number_pattern(pattern, number, prefix, suffix):
+            (grouping, int_prec, frac_prec, exp_prec, exp_plus) = handle_number(number)
+            if number != "":
+                return ColorNumberPattern(pattern, prefix,
+                                        suffix, grouping,
+                                        int_prec, frac_prec,
+                                        exp_prec, exp_plus)
+            else:
+                return pattern
+
         def handle_number(number):
             if 'E' in number:
                 number, exp = number.split('E', 1)
@@ -110,6 +121,7 @@ class PatternParser:
         pattern = CLEAN_CURRENCY_RE.sub('\\1', pattern.replace('\\', ''))
         pattern = ASTERISK_CLEAN_RE.sub('', pattern).strip()
         pattern = UNDERSCORE_RE.sub(' ', pattern)
+        pattern = QUESTION_MARK_RE.sub('', pattern)
         if ';' in pattern:
             pattern_parts = pattern.split(';')
             pos_pattern = pattern_parts[0]
@@ -120,11 +132,8 @@ class PatternParser:
             by_sign_pattern_list = []
             for _pattern in [pos_pattern, neg_pattern, zero_pattern]:
                 prefix, number, suffix = _match_number(_pattern)
-                (grouping, int_prec, frac_prec, exp_prec, exp_plus) = handle_number(number)
-                color_number_pattern = ColorNumberPattern(_pattern, (prefix, prefix),
-                                                          (suffix, suffix), grouping,
-                                                          int_prec, frac_prec,
-                                                          exp_prec, exp_plus)
+                color_number_pattern = generate_color_number_pattern(
+                    _pattern, number, (prefix, prefix), (suffix, suffix))
                 by_sign_pattern_list.append(color_number_pattern)
             self.by_sign_pattern = tuple(by_sign_pattern_list)
 
@@ -134,11 +143,8 @@ class PatternParser:
             neg_prefix = '-' + pos_prefix
             neg_suffix = pos_suffix
 
-            (grouping, int_prec, frac_prec, exp_prec, exp_plus) = handle_number(number)
-            self.general_pattern = ColorNumberPattern(pattern, (pos_prefix, neg_prefix),
-                                                      (pos_suffix, neg_suffix), grouping,
-                                                      int_prec, frac_prec,
-                                                      exp_prec, exp_plus)
+            self.general_pattern = generate_color_number_pattern(
+                pattern, number, (pos_prefix, neg_prefix), (pos_suffix, neg_suffix))
 
     def apply(self, number, locale):
         if self.general_pattern:
@@ -151,7 +157,12 @@ class PatternParser:
                 pattern = pos_pattern
             elif number < 0:
                 pattern = neg_pattern
-        return pattern.apply(number, locale)
+        
+        # in case there are no number inculded - pattern will be string
+        if isinstance(pattern, str):
+            return pattern
+        else:
+            return pattern.apply(number, locale)
 
 
 def format_decimal(number, format=None, locale=LC_NUMERIC):
