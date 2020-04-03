@@ -6,7 +6,7 @@ import io
 import openpyxl
 import six
 from openpyxl.styles.colors import COLOR_INDEX, aRGB_REGEX
-from openpyxl.utils import rows_from_range
+from openpyxl.utils import rows_from_range, column_index_from_string
 
 from xlsx2html.compat import OPENPYXL_24
 from xlsx2html.format import format_cell
@@ -218,7 +218,7 @@ def worksheet_to_data(ws, locale=None, fs=None):
     col_list = []
     max_col_number += 1
 
-    column_dimensions = sorted(ws.column_dimensions.items(), key=lambda d: d[0])
+    column_dimensions = sorted(ws.column_dimensions.items(), key=lambda d: column_index_from_string(d[0]))
 
     for col_i, col_dim in column_dimensions:
         if not all([col_dim.min, col_dim.max]):
