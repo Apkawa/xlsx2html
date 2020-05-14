@@ -110,19 +110,12 @@ def get_styles_from_cell(cell, merged_cell_map=None):
     merged_cell_map = merged_cell_map or {}
 
     h_styles = {
-        'border-collapse': 'collapse'
     }
     b_styles = get_border_style_from_cell(cell)
     if merged_cell_map:
         # TODO edged_cells
         for m_cell in merged_cell_map['cells']:
             b_styles.update(get_border_style_from_cell(m_cell))
-
-    for b_dir in ['border-right-style', 'border-left-style', 'border-top-style',
-                  'border-bottom-style']:
-        if b_dir not in b_styles:
-            b_styles[b_dir] = 'none'
-    h_styles.update(b_styles)
 
     if cell.alignment.horizontal:
         h_styles['text-align'] = cell.alignment.horizontal
@@ -240,9 +233,9 @@ def render_table(data):
     html = [
         '<table  '
         'style="border-collapse: collapse" '
-        'border="0" '
+        'border="1" '
         'cellspacing="0" '
-        'cellpadding="0">'
+        'cellpadding="3"> '
         '<colgroup>'
     ]
     hidden_columns = set()
