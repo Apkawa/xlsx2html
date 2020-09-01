@@ -55,3 +55,4 @@ def test_screenshot_diff(temp_file, browser, screenshot_match):
     xlsx2html(XLSX_FILE, out_file, locale='en')
     browser.visit('file://' + out_file)
     screenshot_match()
+

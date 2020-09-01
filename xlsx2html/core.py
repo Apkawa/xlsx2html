@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import io
 
 import openpyxl
@@ -9,52 +7,8 @@ from openpyxl.styles.colors import COLOR_INDEX, aRGB_REGEX
 from openpyxl.utils import rows_from_range, column_index_from_string
 
 from xlsx2html.compat import OPENPYXL_24
+from xlsx2html.constants.border import DEFAULT_BORDER_STYLE, BORDER_STYLES
 from xlsx2html.format import format_cell
-
-DEFAULT_BORDER_STYLE = {
-    'style': 'solid',
-    'width': '1px',
-}
-
-BORDER_STYLES = {
-    'dashDot': None,
-    'dashDotDot': None,
-    'dashed': {
-        'style': 'dashed',
-    },
-    'dotted': {
-        'style': 'dotted',
-    },
-    'double': {
-        'style': 'double',
-    },
-    'hair': None,
-    'medium': {
-        'style': 'solid',
-        'width': '2px',
-    },
-    'mediumDashDot': {
-        'style': 'solid',
-        'width': '2px',
-    },
-    'mediumDashDotDot': {
-        'style': 'solid',
-        'width': '2px',
-    },
-    'mediumDashed': {
-        'width': '2px',
-        'style': 'dashed',
-    },
-    'slantDashDot': None,
-    'thick': {
-        'style': 'solid',
-        'width': '1px',
-    },
-    'thin': {
-        'style': 'solid',
-        'width': '1px',
-    },
-}
 
 
 def render_attrs(attrs):
