@@ -210,7 +210,9 @@ def worksheet_to_data(ws, locale=None, fs=None, default_cell_border="none"):
             merged_cell_info = merged_cell_map.get(cell.coordinate, {})
             if merged_cell_info:
                 cell_data['attrs'].update(merged_cell_info['attrs'])
-            cell_data['style'].update(get_styles_from_cell(cell, merged_cell_info, default_cell_border))
+            cell_data['style'].update(
+                get_styles_from_cell(cell, merged_cell_info, default_cell_border)
+            )
             data_row.append(cell_data)
 
     col_list = []
@@ -240,7 +242,7 @@ def worksheet_to_data(ws, locale=None, fs=None, default_cell_border="none"):
     return {'rows': data_list, 'cols': col_list}
 
 
-def render_table(data, append_headers, append_linenr):
+def render_table(data, append_headers, append_lineno):
     html = [
         '<table  '
         'style="border-collapse: collapse" '
@@ -263,7 +265,7 @@ def render_table(data, append_headers, append_linenr):
 
     for i, row in enumerate(data['rows']):
         trow = ['<tr>']
-        append_linenr(trow, i)
+        append_lineno(trow, i)
         for cell in row:
             if cell['column'] in hidden_columns:
                 continue
@@ -278,7 +280,7 @@ def render_table(data, append_headers, append_linenr):
     return '\n'.join(html)
 
 
-def render_data_to_html(data, append_headers, append_linenr):
+def render_data_to_html(data, append_headers, append_lineno):
     html = '''
     <!DOCTYPE html>
     <html lang="en">
@@ -291,7 +293,7 @@ def render_data_to_html(data, append_headers, append_linenr):
     </body>
     </html>
     '''
-    return html % render_table(data, append_headers, append_linenr)
+    return html % render_table(data, append_headers, append_lineno)
 
 
 def get_sheet(wb, sheet):
@@ -304,8 +306,11 @@ def get_sheet(wb, sheet):
     return ws
 
 
-def xlsx2html(filepath, output=None, locale='en', sheet=None, parse_formula=False,
-              append_headers=(lambda dumb1, dumb2: True), append_linenr=(lambda dumb1, dumb2: True), default_cell_border="none"):
+def xlsx2html(filepath, output=None, locale='en',
+              sheet=None, parse_formula=False,
+              append_headers=(lambda dumb1, dumb2: True),
+              append_lineno=(lambda dumb1, dumb2: True),
+              default_cell_border="none"):
     wb = openpyxl.load_workbook(filepath, data_only=True)
     ws = get_sheet(wb, sheet)
 
@@ -315,7 +320,7 @@ def xlsx2html(filepath, output=None, locale='en', sheet=None, parse_formula=Fals
         fs = get_sheet(fb, sheet)
 
     data = worksheet_to_data(ws, locale=locale, fs=fs, default_cell_border=default_cell_border)
-    html = render_data_to_html(data, append_headers, append_linenr)
+    html = render_data_to_html(data, append_headers, append_lineno)
 
     if not output:
         output = io.StringIO()
