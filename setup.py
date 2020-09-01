@@ -57,6 +57,7 @@ setup(
         'six',
         'openpyxl>=2.4.8',
         'babel>=2.3.4',
+        'packaging>=20.4',
     ],
     zip_safe=False,
     include_package_data=True,
