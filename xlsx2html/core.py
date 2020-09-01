@@ -110,7 +110,7 @@ def get_border_style_from_cell(cell):
     return h_styles
 
 
-def get_styles_from_cell(cell, merged_cell_map=None):
+def get_styles_from_cell(cell, merged_cell_map=None, default_cell_border="none"):
     merged_cell_map = merged_cell_map or {}
 
     h_styles = {
@@ -122,10 +122,10 @@ def get_styles_from_cell(cell, merged_cell_map=None):
         for m_cell in merged_cell_map['cells']:
             b_styles.update(get_border_style_from_cell(m_cell))
 
-    for b_dir in ['border-right-style', 'border-left-style', 'border-top-style',
-                  'border-bottom-style']:
-        if b_dir not in b_styles:
-            b_styles[b_dir] = 'none'
+    for b_dir in ['border-right', 'border-left', 'border-top', 'border-bottom']:
+        style_tag = (b_dir+"-style")
+        if (b_dir not in b_styles) and (style_tag not in b_styles):
+            b_styles[b_dir] = default_cell_border
     h_styles.update(b_styles)
 
     if cell.alignment.horizontal:
@@ -147,7 +147,7 @@ def get_styles_from_cell(cell, merged_cell_map=None):
     return h_styles
 
 
-def worksheet_to_data(ws, locale=None, fs=None):
+def worksheet_to_data(ws, locale=None, fs=None, default_cell_border="none"):
     merged_cell_map = {}
     if OPENPYXL_24:
         merged_cell_ranges = ws.merged_cell_ranges
@@ -210,7 +210,7 @@ def worksheet_to_data(ws, locale=None, fs=None):
             merged_cell_info = merged_cell_map.get(cell.coordinate, {})
             if merged_cell_info:
                 cell_data['attrs'].update(merged_cell_info['attrs'])
-            cell_data['style'].update(get_styles_from_cell(cell, merged_cell_info))
+            cell_data['style'].update(get_styles_from_cell(cell, merged_cell_info, default_cell_border))
             data_row.append(cell_data)
 
     col_list = []
@@ -240,7 +240,7 @@ def worksheet_to_data(ws, locale=None, fs=None):
     return {'rows': data_list, 'cols': col_list}
 
 
-def render_table(data):
+def render_table(data, append_headers, append_linenr):
     html = [
         '<table  '
         'style="border-collapse: collapse" '
@@ -258,9 +258,12 @@ def render_table(data):
             styles=render_inline_styles(col.get('style')),
         ))
     html.append('</colgroup>')
+    
+    append_headers(data, html)
 
     for i, row in enumerate(data['rows']):
         trow = ['<tr>']
+        append_linenr(trow, i)
         for cell in row:
             if cell['column'] in hidden_columns:
                 continue
@@ -275,7 +278,7 @@ def render_table(data):
     return '\n'.join(html)
 
 
-def render_data_to_html(data):
+def render_data_to_html(data, append_headers, append_linenr):
     html = '''
     <!DOCTYPE html>
     <html lang="en">
@@ -288,7 +291,7 @@ def render_data_to_html(data):
     </body>
     </html>
     '''
-    return html % render_table(data)
+    return html % render_table(data, append_headers, append_linenr)
 
 
 def get_sheet(wb, sheet):
@@ -301,7 +304,8 @@ def get_sheet(wb, sheet):
     return ws
 
 
-def xlsx2html(filepath, output=None, locale='en', sheet=None, parse_formula=False):
+def xlsx2html(filepath, output=None, locale='en', sheet=None, parse_formula=False,
+              append_headers=(lambda dumb1, dumb2: True), append_linenr=(lambda dumb1, dumb2: True), default_cell_border="none"):
     wb = openpyxl.load_workbook(filepath, data_only=True)
     ws = get_sheet(wb, sheet)
 
@@ -310,8 +314,8 @@ def xlsx2html(filepath, output=None, locale='en', sheet=None, parse_formula=Fals
         fb = openpyxl.load_workbook(filepath, data_only=False)
         fs = get_sheet(fb, sheet)
 
-    data = worksheet_to_data(ws, locale=locale, fs=fs)
-    html = render_data_to_html(data)
+    data = worksheet_to_data(ws, locale=locale, fs=fs, default_cell_border=default_cell_border)
+    html = render_data_to_html(data, append_headers, append_linenr)
 
     if not output:
         output = io.StringIO()
