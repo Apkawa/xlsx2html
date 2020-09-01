@@ -51,6 +51,7 @@ def test_hyperlink(temp_file):
 
 @pytest.mark.webtest()
 def test_screenshot_diff(temp_file, browser, screenshot_match):
+    browser.driver.set_window_size(1280, 1024)
     out_file = temp_file()
     xlsx2html(XLSX_FILE, out_file, locale='en')
     browser.visit('file://' + out_file)
