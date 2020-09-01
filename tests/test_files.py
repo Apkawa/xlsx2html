@@ -55,5 +55,5 @@ def test_screenshot_diff(temp_file, browser, screenshot_match):
     out_file = temp_file()
     xlsx2html(XLSX_FILE, out_file, locale='en')
     browser.visit('file://' + out_file)
-    screenshot_match()
+    screenshot_match(0.001)
 

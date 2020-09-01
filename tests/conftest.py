@@ -20,9 +20,10 @@ def screenshot_reference_dir():
     return os.path.join(os.path.dirname(__file__), 'screenshots')
 
 
+# TODO migrate to pytest-image-diff
 @pytest.fixture(scope="function")
 def screenshot_match(browser, request, screenshot_reference_dir, splinter_screenshot_dir):
-    def _factory(suffix='', threshold=0.00):
+    def _factory(threshold=0.00, suffix=''):
         test_info = get_test_info(request)
         reference_dir = os.path.join(screenshot_reference_dir, test_info['classname'])
         screenshot_dir = os.path.join(splinter_screenshot_dir, test_info['classname'])
