@@ -12,6 +12,7 @@ pytest-cov==2.8.1
 pytest-splinter==2.0.1
 chromedriver-binary==2.40.1
 diffimg==0.2.3
+mypy==0.782
 # Docs
 recommonmark
 Sphinx
