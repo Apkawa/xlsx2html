@@ -13,6 +13,7 @@ pytest-splinter==2.0.1
 chromedriver-binary==2.40.1
 diffimg==0.2.3
 mypy==0.782
+pytest-image-diff>=0.0.2
 # Docs
 recommonmark
 Sphinx
