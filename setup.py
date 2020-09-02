@@ -52,7 +52,7 @@ setup(
     author="Apkawa",
     author_email='apkawa@gmail.com',
     packages=[package for package in find_packages() if package.startswith(app_name)],
-    python_requires='>=2.7, <4',
+    python_requires='>=3.6, <4',
     install_requires=[
         'six',
         'openpyxl>=2.4.8',
