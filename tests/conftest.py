@@ -3,6 +3,13 @@ import tempfile
 
 import pytest
 
+FIXTURES_ROOT = os.path.join(os.path.dirname(__file__), 'fixtures')
+
+
+@pytest.fixture()
+def fixture_file():
+    return lambda name: os.path.join(FIXTURES_ROOT, name)
+
 
 @pytest.fixture(scope='session')
 def image_diff_reference_dir():

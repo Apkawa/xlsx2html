@@ -1,14 +1,20 @@
-# -*- coding: utf-8 -*-
 import io
+from collections import defaultdict
+from typing import List
 
 import openpyxl
 import six
+from openpyxl.chart.shapes import GraphicalProperties
+from openpyxl.drawing.image import Image
+from openpyxl.drawing.spreadsheet_drawing import AnchorMarker
 from openpyxl.styles.colors import COLOR_INDEX, aRGB_REGEX
-from openpyxl.utils import rows_from_range, column_index_from_string
+from openpyxl.utils import rows_from_range, column_index_from_string, units
+from openpyxl.worksheet.worksheet import Worksheet
 
 from xlsx2html.compat import OPENPYXL_24
 from xlsx2html.constants.border import DEFAULT_BORDER_STYLE, BORDER_STYLES
 from xlsx2html.format import format_cell
+from xlsx2html.utils.image import bytes_to_datauri
 
 
 def render_attrs(attrs):
@@ -33,7 +39,8 @@ def normalize_color(color):
         try:
             rgb = COLOR_INDEX[color.indexed]
         except IndexError:
-            # The indices 64 and 65 are reserved for the system foreground and background colours respectively
+            # The indices 64 and 65 are reserved for the system foreground and background colours
+            # respectively
             pass
         if not rgb or not aRGB_REGEX.match(rgb):
             # TODO system fg or bg
@@ -77,7 +84,7 @@ def get_styles_from_cell(cell, merged_cell_map=None, default_cell_border="none")
             b_styles.update(get_border_style_from_cell(m_cell))
 
     for b_dir in ['border-right', 'border-left', 'border-top', 'border-bottom']:
-        style_tag = (b_dir+"-style")
+        style_tag = (b_dir + "-style")
         if (b_dir not in b_styles) and (style_tag not in b_styles):
             b_styles[b_dir] = default_cell_border
     h_styles.update(b_styles)
@@ -103,6 +110,44 @@ def get_styles_from_cell(cell, merged_cell_map=None, default_cell_border="none")
 
 def get_cell_id(cell):
     return '{}!{}'.format(cell.parent.title, cell.coordinate)
+
+
+def image_to_data(image: Image) -> dict:
+    to: AnchorMarker = image.anchor.to
+    graphicalProperties: GraphicalProperties = image.anchor.pic.graphicalProperties
+    transform = graphicalProperties.transform
+    # http://officeopenxml.com/drwSp-location.php
+    # offsetX = units.EMU_to_pixels(transform.off.x)
+    # offsetY = units.EMU_to_pixels(transform.off.y)
+    # TODO recalculate to relative cell
+    offsetX = offsetY = 0
+    data = {
+        'col': to.col + 1,
+        'row': to.row,
+        'offset': {
+            'x': offsetX,
+            'y': offsetY,
+        },
+        'width': units.EMU_to_pixels(transform.ext.width),
+        'height': units.EMU_to_pixels(transform.ext.height),
+        'src': bytes_to_datauri(image.ref, image.path),
+        'style': {
+            'margin-left': f'{offsetX}px',
+            'margin-top': f'{offsetY}px',
+            'position': 'absolute'
+        }
+    }
+    return data
+
+
+def images_to_data(ws: Worksheet):
+    images: List[Image] = ws._images
+
+    images_data = defaultdict(list)
+    for _i in images:
+        _id = image_to_data(_i)
+        images_data[(_id['col'], _id['row'])].append(_id)
+    return images_data
 
 
 def worksheet_to_data(ws, locale=None, fs=None, default_cell_border="none"):
@@ -164,7 +209,7 @@ def worksheet_to_data(ws, locale=None, fs=None, default_cell_border="none"):
                     'id': get_cell_id(cell)
                 },
                 'style': {
-                    "height": "{}px".format(height),
+                    "height": f"{height}pt",
                 },
             }
             merged_cell_info = merged_cell_map.get(cell.coordinate, {})
@@ -178,7 +223,8 @@ def worksheet_to_data(ws, locale=None, fs=None, default_cell_border="none"):
     col_list = []
     max_col_number += 1
 
-    column_dimensions = sorted(ws.column_dimensions.items(), key=lambda d: column_index_from_string(d[0]))
+    column_dimensions = sorted(ws.column_dimensions.items(),
+                               key=lambda d: column_index_from_string(d[0]))
 
     for col_i, col_dim in column_dimensions:
         if not all([col_dim.min, col_dim.max]):
@@ -199,7 +245,11 @@ def worksheet_to_data(ws, locale=None, fs=None, default_cell_border="none"):
             })
             if max_col_number < 0:
                 break
-    return {'rows': data_list, 'cols': col_list}
+    return {
+        'rows': data_list,
+        'cols': col_list,
+        'images': images_to_data(ws),
+    }
 
 
 def render_table(data, append_headers, append_lineno):
@@ -229,9 +279,27 @@ def render_table(data, append_headers, append_lineno):
         for cell in row:
             if cell['column'] in hidden_columns:
                 continue
-            trow.append('<td {attrs_str} style="{styles_str}">{formatted_value}</td>'.format(
+            images = data['images'].get((cell['column'], cell['row'])) or []
+            formatted_images = []
+            for img in images:
+                styles = render_inline_styles(img['style'])
+                img_tag = (
+                    '<img width="{width}" height="{height}"'
+                    'style="{styles_str}"'
+                    'src="{src}"'
+                    '/>'
+                ).format(
+                    styles_str=styles, **img)
+                formatted_images.append(img_tag)
+            trow.append((
+                '<td {attrs_str} style="{styles_str}">'
+                '{formatted_value}'
+                '{formatted_images}'
+                '</td>'
+            ).format(
                 attrs_str=render_attrs(cell['attrs']),
                 styles_str=render_inline_styles(cell['style']),
+                formatted_images='\n'.join(formatted_images),
                 **cell))
 
         trow.append('</tr>')

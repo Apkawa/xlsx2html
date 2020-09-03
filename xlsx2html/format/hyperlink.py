@@ -1,6 +1,6 @@
 from openpyxl.formula.tokenizer import Tokenizer, Token
 
-from xlsx2html.utils import parse_cell_location
+from xlsx2html.utils.cell import parse_cell_location
 
 
 class HyperlinkType:
