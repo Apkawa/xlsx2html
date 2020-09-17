@@ -14,7 +14,7 @@ QUESTION_MARK_RE = re.compile(r'\?')
 UNDERSCORE_RE = re.compile(r'_.')
 MINUS_CLEAN_RE = re.compile(r'[-]')
 CLEAN_CURRENCY_RE = re.compile(r'\[\$(.+?)(:?-[\d]+|)\]')
-COLOR_FORMAT = re.compile(r'\[([A-Z]+)\]')
+COLOR_FORMAT = re.compile(r'\[([A-Z]+)\]', re.IGNORECASE)
 
 
 class ColorNumberPattern(NumberPattern):

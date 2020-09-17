@@ -9,7 +9,8 @@ from xlsx2html.format import format_decimal, format_date, format_datetime, forma
 
 decimal_formats = [
     ([-1500, '[RED]0.00', 'ru'], '<span style="color: RED">-1500,00</span>'),
-    ([-1500, '[RED]#,##0.00', 'ru'], '<span style="color: RED">-1\xa0500,00</span>')
+    ([-1500, '[RED]#,##0.00', 'ru'], '<span style="color: RED">-1\xa0500,00</span>'),
+    ([-1500, '[Red]0.00', 'ru'], '<span style="color: Red">-1500,00</span>'),
 ]
 
 
