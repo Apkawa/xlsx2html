@@ -14,7 +14,7 @@ from xlsx2html.format import format_cell
 def render_attrs(attrs):
     if not attrs:
         return ''
-    return ' '.join(["%s=%s" % a for a in sorted(attrs.items(), key=lambda a: a[0])])
+    return ' '.join(["%s=\"%s\"" % a for a in sorted(attrs.items(), key=lambda a: a[0])])
 
 
 def render_inline_styles(styles):
