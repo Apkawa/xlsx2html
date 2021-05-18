@@ -27,7 +27,6 @@ def format_cell(cell, locale=None, f_cell=None):
 
     locale = locale or LC_TIME
 
-    # Possible problem with dd-mmm and more
     cell_format = BUILTIN_FORMATS.get(cell._style.numFmtId, cell_format)
     cell_format = cell_format.split(';')[0]
 

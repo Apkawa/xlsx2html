@@ -6,6 +6,7 @@ import datetime
 import pytest
 
 from xlsx2html.format import format_decimal, format_date, format_datetime, format_time
+from xlsx2html.format.dt import normalize_datetime_format
 
 decimal_formats = [
     ([-1500, '[RED]0.00', 'ru'], '<span style="color: RED">-1500,00</span>'),
@@ -57,6 +58,42 @@ def test_currency_format(fmt_kw, expected):
 
 
 dt = datetime.datetime(2019, 12, 25, 6, 9, 5)
+
+
+test_datetime_formats = {
+    'mm-dd-yy': 'MM-dd-yy',
+    'd-mmm-yy': 'd-MMM-yy',
+    'd-mmm-yyyy': 'd-MMM-yyyy',
+    'd-mmm': 'd-MMM',
+    'mmm-yy': 'MMM-yy',
+    'h:mm AM/PM': 'h:mm a',
+    'h:mm:ss AM/PM': 'h:mm:ss a',
+    'h:mm': 'H:mm',
+    'h:mm:ss': 'H:mm:ss',
+    'm/d/yy h:mm': 'M/d/yy H:mm',
+    'mm:ss': 'mm:ss',
+    'mm:ss.0': 'mm:ss.S',
+    'yyyy-mm-dd hh:mm:ss.000': 'yyyy-MM-dd HH:mm:ss.SSS',
+    'h m m s': 'H m m s',
+    'h m m s m': 'H m m s M',
+    'h m s m': 'H m s M',
+    'm s m': 'm s M',
+    's m': 's m',
+    'h m d s m': 'H m d s M',
+    'y s d mmm m': 'yy s d MMM m',
+    'y s d m': 'yy s d m',
+    'm s y m': 'm s yy M',
+    'h mmm s m': 'H MMM s m',
+    'h mmm m s m': 'H MMM m s M',
+    'mmm s m': 'MMM s m'
+}
+
+
+@pytest.mark.parametrize('xlfmt, bfmt', test_datetime_formats.items())
+def test_normalize_format(xlfmt, bfmt):
+    assert normalize_datetime_format(xlfmt) == bfmt
+    assert normalize_datetime_format(xlfmt.lower()) == bfmt
+    assert normalize_datetime_format(xlfmt.upper()) == bfmt
 
 
 @pytest.mark.parametrize('fmt_kw,expected',
