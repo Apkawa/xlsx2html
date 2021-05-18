@@ -4,6 +4,7 @@ import re
 
 from babel import dates as babel_dates
 from babel.dates import LC_TIME
+import datetime as dt
 
 RE_DATE_TOK = re.compile(r'(?:\\[\\*_"]?|_.|\*.|y+|m+|d+|h+|s+|\.0+|am/pm|a/p|"[^"]*")', re.I)
 MAYBE_MINUTE = ['m', 'mm']
@@ -48,7 +49,7 @@ def normalize_datetime_format(fmt):
                 g = f"'{g}'"
             return g
         t = ''.join(plain)
-        t = re.sub(r"[a-z']+", s, t)
+        t = re.sub(r"[a-z']+", s, t, re.I)
         return t
 
     for i, (text, start, end) in enumerate(found):
@@ -110,14 +111,18 @@ def normalize_datetime_format(fmt):
 
 def format_date(date, fmt, locale=LC_TIME):
     fmt = normalize_datetime_format(fmt)
-    return babel_dates.format_date(date, fmt, locale)
+    datetime = dt.datetime.combine(date, dt.time())
+    return babel_dates.format_datetime(datetime, fmt, locale)
 
 
-def format_datetime(date, fmt, locale=LC_TIME, tzinfo=None):
+def format_datetime(datetime, fmt, locale=LC_TIME, tzinfo=None):
     fmt = normalize_datetime_format(fmt)
-    return babel_dates.format_datetime(date, fmt, locale=locale, tzinfo=tzinfo)
+    return babel_dates.format_datetime(datetime, fmt, locale=locale, tzinfo=tzinfo)
 
 
-def format_time(date, fmt, locale=LC_TIME, tzinfo=None):
+def format_time(time, fmt, locale=LC_TIME, tzinfo=None):
     fmt = normalize_datetime_format(fmt)
-    return babel_dates.format_time(date, fmt, locale=locale, tzinfo=tzinfo)
+    # Excel times are treated as 1900-01-00, which doesn't exist.
+    # Also day of week is deliberately off by one before 1900-03-01
+    datetime = dt.datetime.combine(dt.date(1899, 12, 31), time)
+    return babel_dates.format_datetime(datetime, fmt, locale=locale, tzinfo=tzinfo)
