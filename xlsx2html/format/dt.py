@@ -11,7 +11,7 @@ MAYBE_MINUTE = ['m', 'mm']
 DATE_PERIOD = ['am/pm', 'a/p']
 
 
-def normalize_datetime_format(fmt):
+def normalize_datetime_format(fmt, fixed_for_time=False):
     has_ap = False
     is_minute = set()
     must_minute = False
@@ -99,6 +99,13 @@ def normalize_datetime_format(fmt):
                 tok = 'EEEE'
         else:
             raise ValueError(f'Unhandled datetime token {tok}')
+        if fixed_for_time:
+            if tok == 'd':
+                plain.append('0')
+                continue
+            elif tok == 'dd':
+                plain.append('00')
+                continue
         if len(plain):
             parts.append(clean_plain())
             plain = []
@@ -121,8 +128,8 @@ def format_datetime(datetime, fmt, locale=LC_TIME, tzinfo=None):
 
 
 def format_time(time, fmt, locale=LC_TIME, tzinfo=None):
-    fmt = normalize_datetime_format(fmt)
-    # Excel times are treated as 1900-01-00, which doesn't exist.
-    # Also day of week is deliberately off by one before 1900-03-01
-    datetime = dt.datetime.combine(dt.date(1899, 12, 31), time)
+    # Excel times are treated as Saturday 1900-01-00, which doesn't exist.
+    # So use Saturday 1900-01-06 and force day to 0 instead
+    fmt = normalize_datetime_format(fmt, fixed_for_time=True)
+    datetime = dt.datetime.combine(dt.date(1900, 1, 6), time)
     return babel_dates.format_datetime(datetime, fmt, locale=locale, tzinfo=tzinfo)
