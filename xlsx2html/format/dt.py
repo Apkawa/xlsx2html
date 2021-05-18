@@ -5,22 +5,24 @@ import re
 from babel import dates as babel_dates
 from babel.dates import LC_TIME
 
-RE_DATE_TOK = re.compile(r"(?:y+|m+|d+|h+|s+|\.0+|am/pm|a/p)", re.I)
+RE_DATE_TOK = re.compile(r'(?:\\[\\*_"]?|_.|\*.|y+|m+|d+|h+|s+|\.0+|am/pm|a/p|"[^"]*")', re.I)
 MAYBE_MINUTE = ['m', 'mm']
+DATE_PERIOD = ['am/pm', 'a/p']
 
 
 def normalize_datetime_format(fmt):
     has_ap = False
     is_minute = set()
     must_minute = False
-    found = [(m.group(0).lower(), *m.span()) for m in RE_DATE_TOK.finditer(fmt)]
-    for i, (tok, start, end) in enumerate(found):
-        if tok in ['am/pm', 'a/p']:
+    found = [(m.group(0), *m.span()) for m in RE_DATE_TOK.finditer(fmt)]
+    for i, (text, start, end) in enumerate(found):
+        tok = text.lower()
+        if tok in DATE_PERIOD:
             has_ap = True
         elif tok[0] == 'h':
             # First m after h is always minute
             must_minute = True
-        elif must_minute and tok in ['m', 'mm']:
+        elif must_minute and tok in MAYBE_MINUTE:
             is_minute.add(i)
             must_minute = False
         elif tok[0] == 's':
@@ -28,7 +30,7 @@ def normalize_datetime_format(fmt):
             if last_i < 0:
                 must_minute = True
             elif last_i not in is_minute:
-                if found[last_i][0] in ['m', 'mm']:
+                if found[last_i][0] in MAYBE_MINUTE:
                     # m right before s is always minute
                     is_minute.add(last_i)
                 elif not len(is_minute):
@@ -37,9 +39,39 @@ def normalize_datetime_format(fmt):
 
     parts = []
     pos = 0
-    for i, (tok, start, end) in enumerate(found):
-        parts.append(fmt[pos:start])
-        if tok[0] == 'h':
+    plain = []
+
+    def clean_plain():
+        def s(m):
+            g = m.group().replace("'", "''")
+            if not re.fullmatch(r"'*", g):
+                g = f"'{g}'"
+            return g
+        t = ''.join(plain)
+        t = re.sub(r"[a-z']+", s, t)
+        print(plain, repr(t))
+        return t
+
+    for i, (text, start, end) in enumerate(found):
+        tok = text.lower()
+        plain.append(fmt[pos:start])
+        pos = end
+        if tok[0] == '\\':
+            # Escape sequence \*_"
+            plain.append(text[1:])
+            continue
+        elif tok[0] == '_':
+            # normally puts space at same size as next character; just treat as space
+            plain.append(' ')
+            continue
+        elif tok[0] == '*':
+            # Don't include repeating character
+            continue
+        elif tok[0] == '"':
+            # Quoted string
+            plain.append(text[1:-1])
+            continue
+        elif tok[0] == 'h':
             tok = tok[:2]
             if not has_ap:
                 tok = tok.upper()
@@ -52,10 +84,8 @@ def normalize_datetime_format(fmt):
             tok = tok[:2]
         elif tok[:2] == '.0':
             tok = tok.replace('0', 'S')
-        elif tok == 'am/pm':
-            tok = 'a'
-        elif tok == 'a/p':
-            # Fudging presentation to AM; maybe should be A in some cases?
+        elif tok in DATE_PERIOD:
+            # Fudging A/P to AM; maybe should be A in some cases?
             tok = 'a'
         elif tok[0] == 'y':
             if len(tok) > 2:
@@ -69,10 +99,13 @@ def normalize_datetime_format(fmt):
                 tok = 'EEEE'
         else:
             raise ValueError(f'Unhandled datetime token {tok}')
+        if len(plain):
+            parts.append(clean_plain())
+            plain = []
         parts.append(tok)
-        pos = end
-    parts.append(fmt[pos:])
-
+    plain.append(fmt[pos:])
+    if len(plain):
+        parts.append(clean_plain())
     return ''.join(parts)
 
 

@@ -85,15 +85,18 @@ test_datetime_formats = {
     'm s y m': 'm s yy M',
     'h mmm s m': 'H MMM s m',
     'h mmm m s m': 'H MMM m s M',
-    'mmm s m': 'MMM s m'
+    'h m s am': "H m s 'a'M",
+    'h m s"s"': "H m s's'",
+    'h m s\'': "H m s''",
+    'h m s\'\'': "H m s''''",
+    'h m s"\'\'"': "H m s''''",
+    'h m s"a\'"': "H m s'a'''"
 }
 
 
 @pytest.mark.parametrize('xlfmt, bfmt', test_datetime_formats.items())
 def test_normalize_format(xlfmt, bfmt):
     assert normalize_datetime_format(xlfmt) == bfmt
-    assert normalize_datetime_format(xlfmt.lower()) == bfmt
-    assert normalize_datetime_format(xlfmt.upper()) == bfmt
 
 
 @pytest.mark.parametrize('fmt_kw,expected',
