@@ -130,11 +130,15 @@ def format_datetime(datetime, fmt, locale=LC_TIME, tzinfo=None):
     return babel_dates.format_datetime(datetime, fmt, locale=locale, tzinfo=tzinfo)
 
 
-def format_time(time, fmt, locale=LC_TIME, tzinfo=None):
+def format_time(time, fmt, locale=LC_TIME, tzinfo=None, date=None):
     # Excel times are treated as Saturday 1900-01-00, which doesn't exist.
     # So use Saturday 1900-01-06 and force day to 0 instead
-    fmt = normalize_datetime_format(fmt, fixed_for_time=True)
-    datetime = dt.datetime.combine(dt.date(1900, 1, 6), time)
+    fixed_for_time = False
+    if date is None:
+        date = dt.date(1900, 1, 6)
+        fixed_for_time = True
+    datetime = dt.datetime.combine(date, time)
+    fmt = normalize_datetime_format(fmt, fixed_for_time=fixed_for_time)
     return babel_dates.format_datetime(datetime, fmt, locale=locale, tzinfo=tzinfo)
 
 
