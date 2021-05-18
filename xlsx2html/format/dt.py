@@ -180,7 +180,7 @@ def format_timedelta(timedelta, fmt):
             plain.append(f.format(e_m))
         elif tok_type == '[s':
             if '.' in tok:
-                stok, mstok = tok.split('.')
+                mstok = tok.split('.')[0]
                 f = "{:0" + str(len(tok) - 2) + "." + str(len(mstok)) + "f}"
             else:
                 f = "{:0" + str(len(tok) - 2) + ".0f}"
