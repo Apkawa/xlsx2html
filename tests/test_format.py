@@ -5,7 +5,8 @@ import datetime
 
 import pytest
 
-from xlsx2html.format import format_decimal, format_date, format_datetime, format_time
+from xlsx2html.format import format_decimal
+from xlsx2html.format import format_date, format_datetime, format_time, format_timedelta
 from xlsx2html.format.dt import normalize_datetime_format
 
 decimal_formats = [
@@ -57,9 +58,6 @@ def test_currency_format(fmt_kw, expected):
     assert format_decimal(*fmt_kw) == expected
 
 
-dt = datetime.datetime(2019, 12, 25, 6, 9, 5)
-
-
 test_datetime_formats = {
     'mm-dd-yy': 'MM-dd-yy',
     'd-mmm-yy': 'd-MMM-yy',
@@ -99,6 +97,9 @@ def test_normalize_format(xlfmt, bfmt):
     assert normalize_datetime_format(xlfmt) == bfmt
 
 
+dt = datetime.datetime(2019, 12, 25, 6, 9, 5)
+
+
 @pytest.mark.parametrize('fmt_kw,expected',
                          [
                              ([dt.date(), 'MM/DD/YY', 'ru'], '12/25/19'),
@@ -135,3 +136,23 @@ def test_format_datetime(fmt_kw, expected):
                          )
 def test_format_time(fmt_kw, expected):
     assert format_time(*fmt_kw) == expected
+
+
+td = datetime.timedelta(hours=2, minutes=3, seconds=4, milliseconds=5)
+td2 = datetime.timedelta(hours=2, minutes=3, seconds=4, milliseconds=999)
+
+timedelta_arge = [
+    ([td, '[hhh]:mm:ss.000'], '002:03:04.005'),
+    ([td, '[hhh]:mm:ss.00'], '002:03:04.01'),
+    ([td2, '[hhh]:mm:ss.000'], '002:03:04.999'),
+    ([td2, '[h]:mm:ss'], '2:03:05'),
+    ([td2, '[mmmm]:ss'], '0123:05'),
+    ([td2, '[s]'], '7385'),
+    ([td, '[s].00'], '7384.01'),
+    ([td, '[hhh] - mm - ss.000 x'], '002 - 03 - 04.005 x')
+]
+
+
+@pytest.mark.parametrize('args,expected', timedelta_arge)
+def test_format_timedelta(args, expected):
+    assert format_timedelta(*args) == expected

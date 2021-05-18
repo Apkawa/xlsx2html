@@ -7,7 +7,7 @@ from babel.numbers import (
 )
 
 from xlsx2html.constants import BUILTIN_FORMATS
-from .dt import format_time, format_datetime, format_date
+from .dt import format_time, format_datetime, format_date, format_timedelta
 from .hyperlink import format_hyperlink
 from .locale import extract_locale_from_format
 from .number import format_decimal
@@ -40,6 +40,8 @@ def format_cell(cell, locale=None, f_cell=None):
         formatted_value = format_datetime(value, cell_format, locale=locale)
     elif type(value) == datetime.time:
         formatted_value = format_time(value, cell_format, locale=locale)
+    elif type(value) == datetime.timedelta:
+        formatted_value = format_timedelta(value, cell_format)
 
     formatted_value = format_hyperlink(formatted_value, cell, f_cell)
 
