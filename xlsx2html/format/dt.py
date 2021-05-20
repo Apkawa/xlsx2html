@@ -122,7 +122,7 @@ def normalize_datetime_format(fmt, fixed_for_time=False):
 def format_date(date, fmt, locale=LC_TIME):
     fmt = normalize_datetime_format(fmt)
     datetime = dt.datetime.combine(date, dt.time())
-    return babel_dates.format_datetime(datetime, fmt, locale)
+    return babel_dates.format_datetime(datetime, fmt, locale=locale)
 
 
 def format_datetime(datetime, fmt, locale=LC_TIME, tzinfo=None):
@@ -180,7 +180,7 @@ def format_timedelta(timedelta, fmt):
             plain.append(f.format(e_m))
         elif tok_type == '[s':
             if '.' in tok:
-                mstok = tok.split('.')[0]
+                mstok = tok.split('.')[1]
                 f = "{:0" + str(len(tok) - 2) + "." + str(len(mstok)) + "f}"
             else:
                 f = "{:0" + str(len(tok) - 2) + ".0f}"
