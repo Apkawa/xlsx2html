@@ -33,7 +33,8 @@ def normalize_color(color):
         try:
             rgb = COLOR_INDEX[color.indexed]
         except IndexError:
-            # The indices 64 and 65 are reserved for the system foreground and background colours respectively
+            # The indices 64 and 65 are reserved for the system
+            # foreground and background colours respectively
             pass
         if not rgb or not aRGB_REGEX.match(rgb):
             # TODO system fg or bg
@@ -77,7 +78,7 @@ def get_styles_from_cell(cell, merged_cell_map=None, default_cell_border="none")
             b_styles.update(get_border_style_from_cell(m_cell))
 
     for b_dir in ['border-right', 'border-left', 'border-top', 'border-bottom']:
-        style_tag = (b_dir+"-style")
+        style_tag = (b_dir + "-style")
         if (b_dir not in b_styles) and (style_tag not in b_styles):
             b_styles[b_dir] = default_cell_border
     h_styles.update(b_styles)
@@ -178,7 +179,8 @@ def worksheet_to_data(ws, locale=None, fs=None, default_cell_border="none"):
     col_list = []
     max_col_number += 1
 
-    column_dimensions = sorted(ws.column_dimensions.items(), key=lambda d: column_index_from_string(d[0]))
+    column_dimensions = sorted(ws.column_dimensions.items(),
+                               key=lambda d: column_index_from_string(d[0]))
 
     for col_i, col_dim in column_dimensions:
         if not all([col_dim.min, col_dim.max]):

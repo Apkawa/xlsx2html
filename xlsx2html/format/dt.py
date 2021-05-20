@@ -1,13 +1,15 @@
 from __future__ import unicode_literals
 
+import datetime as dt
 import re
 
 from babel import dates as babel_dates
 from babel.dates import LC_TIME
-import datetime as dt
 
 RE_DATE_TOK = re.compile(r'(?:\\[\\*_"]?|_.|\*.|y+|m+|d+|h+|s+|\.0+|am/pm|a/p|"[^"]*")', re.I)
-RE_TD_TOK = re.compile(r'(?:\\[\\*_"]?|_.|\*.|\[h+\]|\[m+\]|\[s+\](?:\.0+)?|m+|s+(?:\.0+)?|h+|y+|d+|"[^"]*")', re.I)
+RE_TD_TOK = re.compile(
+    r'(?:\\[\\*_"]?|_.|\*.|\[h+\]|\[m+\]|\[s+\](?:\.0+)?|m+|s+(?:\.0+)?|h+|y+|d+|"[^"]*")',
+    re.I)
 MAYBE_MINUTE = ['m', 'mm']
 DATE_PERIOD = ['am/pm', 'a/p']
 
@@ -50,6 +52,7 @@ def normalize_datetime_format(fmt, fixed_for_time=False):
             if not re.fullmatch(r"'*", g):
                 g = f"'{g}'"
             return g
+
         t = ''.join(plain)
         t = re.sub(r"[a-z']+", s, t, re.I)
         return t
