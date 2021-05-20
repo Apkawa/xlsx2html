@@ -5,7 +5,9 @@ import datetime
 
 import pytest
 
-from xlsx2html.format import format_decimal, format_date, format_datetime, format_time
+from xlsx2html.format import format_decimal
+from xlsx2html.format import format_date, format_datetime, format_time, format_timedelta
+from xlsx2html.format.dt import normalize_datetime_format
 
 decimal_formats = [
     ([-1500, '[RED]0.00', 'ru'], '<span style="color: RED">-1500,00</span>'),
@@ -56,6 +58,45 @@ def test_currency_format(fmt_kw, expected):
     assert format_decimal(*fmt_kw) == expected
 
 
+test_datetime_formats = {
+    'mm-dd-yy': 'MM-dd-yy',
+    'd-mmm-yy': 'd-MMM-yy',
+    'd-mmm-yyyy': 'd-MMM-yyyy',
+    'd-mmm': 'd-MMM',
+    'mmm-yy': 'MMM-yy',
+    'h:mm AM/PM': 'h:mm a',
+    'h:mm:ss AM/PM': 'h:mm:ss a',
+    'h:mm': 'H:mm',
+    'h:mm:ss': 'H:mm:ss',
+    'm/d/yy h:mm': 'M/d/yy H:mm',
+    'mm:ss': 'mm:ss',
+    'mm:ss.0': 'mm:ss.S',
+    'yyyy-mm-dd hh:mm:ss.000': 'yyyy-MM-dd HH:mm:ss.SSS',
+    'h m m s': 'H m m s',
+    'h m m s m': 'H m m s M',
+    'h m s m': 'H m s M',
+    'm s m': 'm s M',
+    's m': 's m',
+    'h m d s m': 'H m d s M',
+    'y s d mmm m': 'yy s d MMM m',
+    'y s d m': 'yy s d m',
+    'm s y m': 'm s yy M',
+    'h mmm s m': 'H MMM s m',
+    'h mmm m s m': 'H MMM m s M',
+    'h m s am': "H m s 'a'M",
+    'h m s"s"': "H m s's'",
+    'h m s\'': "H m s''",
+    'h m s\'\'': "H m s''''",
+    'h m s"\'\'"': "H m s''''",
+    'h m s"a\'"': "H m s'a'''"
+}
+
+
+@pytest.mark.parametrize('xlfmt, bfmt', test_datetime_formats.items())
+def test_normalize_format(xlfmt, bfmt):
+    assert normalize_datetime_format(xlfmt) == bfmt
+
+
 dt = datetime.datetime(2019, 12, 25, 6, 9, 5)
 
 
@@ -95,3 +136,23 @@ def test_format_datetime(fmt_kw, expected):
                          )
 def test_format_time(fmt_kw, expected):
     assert format_time(*fmt_kw) == expected
+
+
+td = datetime.timedelta(hours=2, minutes=3, seconds=4, milliseconds=5)
+td2 = datetime.timedelta(hours=2, minutes=3, seconds=4, milliseconds=999)
+
+timedelta_arge = [
+    ([td, '[hhh]:mm:ss.000'], '002:03:04.005'),
+    ([td, '[hhh]:mm:ss.00'], '002:03:04.01'),
+    ([td2, '[hhh]:mm:ss.000'], '002:03:04.999'),
+    ([td2, '[h]:mm:ss'], '2:03:05'),
+    ([td2, '[mmmm]:ss'], '0123:05'),
+    ([td2, '[s]'], '7385'),
+    ([td, '[s].00'], '7384.01'),
+    ([td, '[hhh] - mm - ss.000 x'], '002 - 03 - 04.005 x')
+]
+
+
+@pytest.mark.parametrize('args,expected', timedelta_arge)
+def test_format_timedelta(args, expected):
+    assert format_timedelta(*args) == expected

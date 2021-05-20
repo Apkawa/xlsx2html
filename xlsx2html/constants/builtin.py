@@ -1,6 +1,7 @@
 # http://unicode.org/reports/tr35/tr35-dates.html#Date_Format_Patterns
 
 BUILTIN_FORMATS = {
+    0: 'General',
     1: '0',
     2: '0.00',
     3: '#,##0',
@@ -15,16 +16,16 @@ BUILTIN_FORMATS = {
     12: '# ?/?',
     13: '# ??/??',
 
-    14: 'MM-dd-yy',
-    15: 'd-MMM-yy',
-    16: 'd-MMM',
-    17: 'MMM-yy',
+    14: 'mm-dd-yy',
+    15: 'd-mmm-yy',
+    16: 'd-mmm',
+    17: 'mmm-yy',
 
     18: 'h:mm AM/PM',
     19: 'h:mm:ss AM/PM',
     20: 'h:mm',
     21: 'h:mm:ss',
-    22: 'M/d/yyyy h:mm',
+    22: 'm/d/yy h:mm',
 
     37: '#,##0_);(#,##0)',
     38: '#,##0_);[Red](#,##0)',
