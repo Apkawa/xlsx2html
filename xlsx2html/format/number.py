@@ -79,9 +79,9 @@ class PatternParser:
             (grouping, int_prec, frac_prec, exp_prec, exp_plus) = handle_number(number)
             if number != "":
                 return ColorNumberPattern(pattern, prefix,
-                                        suffix, grouping,
-                                        int_prec, frac_prec,
-                                        exp_prec, exp_plus)
+                                          suffix, grouping,
+                                          int_prec, frac_prec,
+                                          exp_prec, exp_plus)
             else:
                 return pattern
 
@@ -157,8 +157,8 @@ class PatternParser:
                 pattern = pos_pattern
             elif number < 0:
                 pattern = neg_pattern
-        
-        # in case there are no number inculded - pattern will be string
+
+        # in case there are no number included - pattern will be string
         if isinstance(pattern, str):
             return pattern
         else:

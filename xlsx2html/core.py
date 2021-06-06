@@ -20,7 +20,7 @@ from xlsx2html.utils.image import bytes_to_datauri
 def render_attrs(attrs):
     if not attrs:
         return ''
-    return ' '.join(["%s=%s" % a for a in sorted(attrs.items(), key=lambda a: a[0])])
+    return ' '.join(['%s="%s"' % a for a in sorted(attrs.items(), key=lambda a: a[0]) if a[1]])
 
 
 def render_inline_styles(styles):
@@ -39,8 +39,8 @@ def normalize_color(color):
         try:
             rgb = COLOR_INDEX[color.indexed]
         except IndexError:
-            # The indices 64 and 65 are reserved for the system foreground and background colours
-            # respectively
+            # The indices 64 and 65 are reserved for the system
+            # foreground and background colours respectively
             pass
         if not rgb or not aRGB_REGEX.match(rgb):
             # TODO system fg or bg
@@ -167,13 +167,16 @@ def worksheet_to_data(ws, locale=None, fs=None, default_cell_border="none"):
         cell_range_list = list(ws[cell_range])
         m_cell = cell_range_list[0][0]
 
+        colspan = len(cell_range_list[0])
+        rowspan = len(cell_range_list)
         merged_cell_map[m_cell.coordinate] = {
             'attrs': {
-                'colspan': len(cell_range_list[0]),
-                'rowspan': len(cell_range_list),
+                'colspan': None if colspan <= 1 else colspan,
+                'rowspan': None if rowspan <= 1 else rowspan,
             },
             'cells': [c for rows in cell_range_list for c in rows],
         }
+
         excluded_cells.remove(m_cell.coordinate)
 
     max_col_number = 0

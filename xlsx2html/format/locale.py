@@ -10,8 +10,7 @@ LOCALE_FORMAT_RE = re.compile(r'''
         (?:.+|)
         -(?P<lcid>[0-9A-Fa-f]{3,4})
     \]
-    '''
-    , re.VERBOSE)
+    ''', re.VERBOSE)
 
 
 def parse_locale_code(code):
