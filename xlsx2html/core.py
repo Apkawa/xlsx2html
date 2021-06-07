@@ -113,17 +113,18 @@ def get_cell_id(cell):
 
 
 def image_to_data(image: Image) -> dict:
+    _from: AnchorMarker = image.anchor._from
     to: AnchorMarker = image.anchor.to
     graphicalProperties: GraphicalProperties = image.anchor.pic.graphicalProperties
     transform = graphicalProperties.transform
-    # http://officeopenxml.com/drwSp-location.php
-    # offsetX = units.EMU_to_pixels(transform.off.x)
-    # offsetY = units.EMU_to_pixels(transform.off.y)
-    # TODO recalculate to relative cell
     offsetX = offsetY = 0
+    # http://officeopenxml.com/drwSp-location.php
+    offsetX = units.EMU_to_pixels(_from.colOff)
+    offsetY = units.EMU_to_pixels(_from.rowOff)
+    # TODO recalculate to relative cell
     data = {
-        'col': to.col + 1,
-        'row': to.row,
+        'col': _from.col + 1,
+        'row': _from.row + 1,
         'offset': {
             'x': offsetX,
             'y': offsetY,
@@ -296,8 +297,8 @@ def render_table(data, append_headers, append_lineno):
                 formatted_images.append(img_tag)
             trow.append((
                 '<td {attrs_str} style="{styles_str}">'
-                '{formatted_value}'
                 '{formatted_images}'
+                '{formatted_value}'
                 '</td>'
             ).format(
                 attrs_str=render_attrs(cell['attrs']),
