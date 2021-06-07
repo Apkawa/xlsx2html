@@ -16,7 +16,7 @@ jobs:
             python-version: 3.7
           - toxenv: type
             python-version: 3.7
-          - toxenv: TOXENV=py37-openpyxl24
+          - toxenv: py37-openpyxl24
             python-version: 3.7
     steps:
       # chrome headless
