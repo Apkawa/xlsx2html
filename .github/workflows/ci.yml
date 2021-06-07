@@ -22,6 +22,7 @@ jobs:
             python-version: 3.7
             experimental: true
           - toxenv: py37-openpyxl24
+            experimental: false
             python-version: 3.7
     continue-on-error: ${{ matrix.experimental }}
     env:
