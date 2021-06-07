@@ -7,9 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-20.04
-    name: "python ${{ matrix.python-version }}-${{ matrix.toxenv }}"
-    continue-on-error: ${{ matrix.experimental }}
+    name: "python ${{ matrix.python-version }} ${{ matrix.toxenv }}"
     strategy:
+      fail-fast: false
       matrix:
         python-version: [ 3.6, 3.7, 3.8, 3.9 ]
         toxenv: [""]
@@ -23,6 +23,7 @@ jobs:
             experimental: true
           - toxenv: py37-openpyxl24
             python-version: 3.7
+    continue-on-error: ${{ matrix.experimental }}
     env:
       TOXENV: ${{ matrix.toxenv }}
     steps:
