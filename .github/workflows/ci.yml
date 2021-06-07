@@ -10,7 +10,7 @@ jobs:
     name: "python ${{ matrix.python-version }}-${{ matrix.toxenv }}"
     strategy:
       matrix:
-        toxenv: []
+        toxenv: [""]
         python-version: [ 3.6, 3.7, 3.8, 3.9 ]
         include:
           - toxenv: qa
