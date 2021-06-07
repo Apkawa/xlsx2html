@@ -8,15 +8,19 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     name: "python ${{ matrix.python-version }}-${{ matrix.toxenv }}"
+    continue-on-error: ${{ matrix.experimental }}
     strategy:
       matrix:
-        toxenv: [""]
         python-version: [ 3.6, 3.7, 3.8, 3.9 ]
+        toxenv: [""]
+        experimental: [ false ]
         include:
           - toxenv: qa
             python-version: 3.7
+            experimental: true
           - toxenv: type
             python-version: 3.7
+            experimental: true
           - toxenv: py37-openpyxl24
             python-version: 3.7
     env:
