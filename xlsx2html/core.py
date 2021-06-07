@@ -114,10 +114,8 @@ def get_cell_id(cell):
 
 def image_to_data(image: Image) -> dict:
     _from: AnchorMarker = image.anchor._from
-    to: AnchorMarker = image.anchor.to
     graphicalProperties: GraphicalProperties = image.anchor.pic.graphicalProperties
     transform = graphicalProperties.transform
-    offsetX = offsetY = 0
     # http://officeopenxml.com/drwSp-location.php
     offsetX = units.EMU_to_pixels(_from.colOff)
     offsetY = units.EMU_to_pixels(_from.rowOff)
