@@ -1,0 +1,41 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    name: "python ${{ matrix.python-version }}"
+    strategy:
+      matrix:
+        python-version: [ 3.6, 3.7, 3.8, 3.9 ]
+        include:
+          - toxenv: qa
+            python-version: 3.7
+          - toxenv: type
+            python-version: 3.7
+          - toxenv: TOXENV=py37-openpyxl24
+            python-version: 3.7
+    steps:
+      # chrome headless
+      - uses: browser-actions/setup-chrome@latest
+      - uses: actions/checkout@v2
+      - name: Set up python ${{ matrix.python-version}}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install tox python-coveralls codecov
+      - name: Run tests
+        env:
+          TOXENV: ${{ matrix.toxenv }}
+        run: tox
+      - uses: codecov/codecov-action@v1
+        with:
+          env_vars: OS,PYTHON,TOXENV
+
+
