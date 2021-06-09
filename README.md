@@ -42,7 +42,7 @@ import io
 from xlsx2html import xlsx2html
 
 # must be binary mode
-xlsx_file = open('path/to/example.xlsx', 'rb') 
+xlsx_file = open('path/to/example.xlsx', 'rb')
 out_file = io.StringIO()
 xlsx2html(xlsx_file, out_file, locale='en')
 out_file.seek(0)
@@ -53,22 +53,4 @@ or from shell
 
 ```bash
 python -m xlsx2html path/to/example.xlsx path/to/output.html
-```
-
-
-# Contributors
-```bash
-pip install -r requirements.txt
-pytest # run tests
-tox # run test matrix
-```
-
-## Shift version
-```bash 
-python setup.py bumpversion
-```
-
-## publish
-```bash
-python setup.py publish
 ```

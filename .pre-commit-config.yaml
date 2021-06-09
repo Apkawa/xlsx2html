@@ -1,0 +1,32 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.3.0
+    hooks:
+      - id: check-yaml
+      - id: check-ast
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/psf/black
+    rev: 19.3b0
+    hooks:
+      - id: black
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        language: system
+        entry: tox -e py3
+        pass_filenames: false
+        always_run: true
+      - id: flake8
+        name: flake8
+        language: system
+        entry: tox -e qa
+        pass_filenames: false
+        always_run: true
+      - id: mypy
+        name: mypy
+        language: system
+        entry: tox -e type
+        pass_filenames: false
+        always_run: true

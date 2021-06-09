@@ -11,7 +11,8 @@ CELL_LOCATION_RE = re.compile(
         (?P<coord>[A-Za-z]+[\d]+)
     $
     """,
-    re.VERBOSE)
+    re.VERBOSE,
+)
 
 
 def parse_cell_location(cell_location):

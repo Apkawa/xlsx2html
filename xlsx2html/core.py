@@ -19,23 +19,30 @@ from xlsx2html.utils.image import bytes_to_datauri
 
 def render_attrs(attrs):
     if not attrs:
-        return ''
-    return ' '.join(['%s="%s"' % a for a in sorted(attrs.items(), key=lambda a: a[0]) if a[1]])
+        return ""
+    return " ".join(
+        ['%s="%s"' % a for a in sorted(attrs.items(), key=lambda a: a[0]) if a[1]]
+    )
 
 
 def render_inline_styles(styles):
     if not styles:
-        return ''
-    return ';'.join(
-        ["%s: %s" % a for a in sorted(styles.items(), key=lambda a: a[0]) if a[1] is not None])
+        return ""
+    return ";".join(
+        [
+            "%s: %s" % a
+            for a in sorted(styles.items(), key=lambda a: a[0])
+            if a[1] is not None
+        ]
+    )
 
 
 def normalize_color(color):
     # TODO RGBA
     rgb = None
-    if color.type == 'rgb':
+    if color.type == "rgb":
         rgb = color.rgb
-    if color.type == 'indexed':
+    if color.type == "indexed":
         try:
             rgb = COLOR_INDEX[color.indexed]
         except IndexError:
@@ -44,15 +51,15 @@ def normalize_color(color):
             pass
         if not rgb or not aRGB_REGEX.match(rgb):
             # TODO system fg or bg
-            rgb = '00000000'
+            rgb = "00000000"
     if rgb:
-        return '#' + rgb[2:]
+        return "#" + rgb[2:]
     return None
 
 
 def get_border_style_from_cell(cell):
     h_styles = {}
-    for b_dir in ['right', 'left', 'top', 'bottom']:
+    for b_dir in ["right", "left", "top", "bottom"]:
         b_s = getattr(cell.border, b_dir)
         if not b_s:
             continue
@@ -64,9 +71,9 @@ def get_border_style_from_cell(cell):
             continue
 
         for k, v in border_style.items():
-            h_styles['border-%s-%s' % (b_dir, k)] = v
+            h_styles["border-%s-%s" % (b_dir, k)] = v
         if b_s.color:
-            h_styles['border-%s-color' % (b_dir)] = normalize_color(b_s.color)
+            h_styles["border-%s-color" % (b_dir)] = normalize_color(b_s.color)
 
     return h_styles
 
@@ -74,42 +81,40 @@ def get_border_style_from_cell(cell):
 def get_styles_from_cell(cell, merged_cell_map=None, default_cell_border="none"):
     merged_cell_map = merged_cell_map or {}
 
-    h_styles = {
-        'border-collapse': 'collapse'
-    }
+    h_styles = {"border-collapse": "collapse"}
     b_styles = get_border_style_from_cell(cell)
     if merged_cell_map:
         # TODO edged_cells
-        for m_cell in merged_cell_map['cells']:
+        for m_cell in merged_cell_map["cells"]:
             b_styles.update(get_border_style_from_cell(m_cell))
 
-    for b_dir in ['border-right', 'border-left', 'border-top', 'border-bottom']:
-        style_tag = (b_dir + "-style")
+    for b_dir in ["border-right", "border-left", "border-top", "border-bottom"]:
+        style_tag = b_dir + "-style"
         if (b_dir not in b_styles) and (style_tag not in b_styles):
             b_styles[b_dir] = default_cell_border
     h_styles.update(b_styles)
 
     if cell.alignment.horizontal:
-        h_styles['text-align'] = cell.alignment.horizontal
+        h_styles["text-align"] = cell.alignment.horizontal
 
-    if cell.fill.patternType == 'solid':
+    if cell.fill.patternType == "solid":
         # TODO patternType != 'solid'
-        h_styles['background-color'] = normalize_color(cell.fill.fgColor)
+        h_styles["background-color"] = normalize_color(cell.fill.fgColor)
     if cell.font:
-        h_styles['font-size'] = "%spx" % cell.font.sz
+        h_styles["font-size"] = "%spx" % cell.font.sz
         if cell.font.color:
-            h_styles['color'] = normalize_color(cell.font.color)
+            h_styles["color"] = normalize_color(cell.font.color)
         if cell.font.b:
-            h_styles['font-weight'] = 'bold'
+            h_styles["font-weight"] = "bold"
         if cell.font.i:
-            h_styles['font-style'] = 'italic'
+            h_styles["font-style"] = "italic"
         if cell.font.u:
-            h_styles['font-decoration'] = 'underline'
+            h_styles["font-decoration"] = "underline"
     return h_styles
 
 
 def get_cell_id(cell):
-    return '{}!{}'.format(cell.parent.title, cell.coordinate)
+    return "{}!{}".format(cell.parent.title, cell.coordinate)
 
 
 def image_to_data(image: Image) -> dict:
@@ -121,20 +126,17 @@ def image_to_data(image: Image) -> dict:
     offsetY = units.EMU_to_pixels(_from.rowOff)
     # TODO recalculate to relative cell
     data = {
-        'col': _from.col + 1,
-        'row': _from.row + 1,
-        'offset': {
-            'x': offsetX,
-            'y': offsetY,
+        "col": _from.col + 1,
+        "row": _from.row + 1,
+        "offset": {"x": offsetX, "y": offsetY},
+        "width": units.EMU_to_pixels(transform.ext.width),
+        "height": units.EMU_to_pixels(transform.ext.height),
+        "src": bytes_to_datauri(image.ref, image.path),
+        "style": {
+            "margin-left": f"{offsetX}px",
+            "margin-top": f"{offsetY}px",
+            "position": "absolute",
         },
-        'width': units.EMU_to_pixels(transform.ext.width),
-        'height': units.EMU_to_pixels(transform.ext.height),
-        'src': bytes_to_datauri(image.ref, image.path),
-        'style': {
-            'margin-left': f'{offsetX}px',
-            'margin-top': f'{offsetY}px',
-            'position': 'absolute'
-        }
     }
     return data
 
@@ -145,7 +147,7 @@ def images_to_data(ws: Worksheet):
     images_data = defaultdict(list)
     for _i in images:
         _id = image_to_data(_i)
-        images_data[(_id['col'], _id['row'])].append(_id)
+        images_data[(_id["col"], _id["row"])].append(_id)
     return images_data
 
 
@@ -156,11 +158,14 @@ def worksheet_to_data(ws, locale=None, fs=None, default_cell_border="none"):
         excluded_cells = set(ws.merged_cells)
     else:
         merged_cell_ranges = [cell_range.coord for cell_range in ws.merged_cells.ranges]
-        excluded_cells = set([cell
-                              for cell_range in merged_cell_ranges
-                              for rows in rows_from_range(cell_range)
-                              for cell in rows
-                              ])
+        excluded_cells = set(
+            [
+                cell
+                for cell_range in merged_cell_ranges
+                for rows in rows_from_range(cell_range)
+                for cell in rows
+            ]
+        )
 
     for cell_range in merged_cell_ranges:
         cell_range_list = list(ws[cell_range])
@@ -169,11 +174,11 @@ def worksheet_to_data(ws, locale=None, fs=None, default_cell_border="none"):
         colspan = len(cell_range_list[0])
         rowspan = len(cell_range_list)
         merged_cell_map[m_cell.coordinate] = {
-            'attrs': {
-                'colspan': None if colspan <= 1 else colspan,
-                'rowspan': None if rowspan <= 1 else rowspan,
+            "attrs": {
+                "colspan": None if colspan <= 1 else colspan,
+                "rowspan": None if rowspan <= 1 else rowspan,
             },
-            'cells': [c for rows in cell_range_list for c in rows],
+            "cells": [c for rows in cell_range_list for c in rows],
         }
 
         excluded_cells.remove(m_cell.coordinate)
@@ -203,21 +208,17 @@ def worksheet_to_data(ws, locale=None, fs=None, default_cell_border="none"):
                 f_cell = fs[cell.coordinate]
 
             cell_data = {
-                'column': cell.column,
-                'row': cell.row,
-                'value': cell.value,
-                'formatted_value': format_cell(cell, locale=locale, f_cell=f_cell),
-                'attrs': {
-                    'id': get_cell_id(cell)
-                },
-                'style': {
-                    "height": f"{height}pt",
-                },
+                "column": cell.column,
+                "row": cell.row,
+                "value": cell.value,
+                "formatted_value": format_cell(cell, locale=locale, f_cell=f_cell),
+                "attrs": {"id": get_cell_id(cell)},
+                "style": {"height": f"{height}pt"},
             }
             merged_cell_info = merged_cell_map.get(cell.coordinate, {})
             if merged_cell_info:
-                cell_data['attrs'].update(merged_cell_info['attrs'])
-            cell_data['style'].update(
+                cell_data["attrs"].update(merged_cell_info["attrs"])
+            cell_data["style"].update(
                 get_styles_from_cell(cell, merged_cell_info, default_cell_border)
             )
             data_row.append(cell_data)
@@ -225,93 +226,94 @@ def worksheet_to_data(ws, locale=None, fs=None, default_cell_border="none"):
     col_list = []
     max_col_number += 1
 
-    column_dimensions = sorted(ws.column_dimensions.items(),
-                               key=lambda d: column_index_from_string(d[0]))
+    column_dimensions = sorted(
+        ws.column_dimensions.items(), key=lambda d: column_index_from_string(d[0])
+    )
 
     for col_i, col_dim in column_dimensions:
         if not all([col_dim.min, col_dim.max]):
             continue
         width = 0.89
         if col_dim.customWidth:
-            width = round(col_dim.width / 10., 2)
+            width = round(col_dim.width / 10.0, 2)
         col_width = 96 * width
 
         for _ in six.moves.range((col_dim.max - col_dim.min) + 1):
             max_col_number -= 1
-            col_list.append({
-                'index': col_dim.index,
-                'hidden': col_dim.hidden,
-                'style': {
-                    "width": "{}px".format(col_width),
+            col_list.append(
+                {
+                    "index": col_dim.index,
+                    "hidden": col_dim.hidden,
+                    "style": {"width": "{}px".format(col_width)},
                 }
-            })
+            )
             if max_col_number < 0:
                 break
-    return {
-        'rows': data_list,
-        'cols': col_list,
-        'images': images_to_data(ws),
-    }
+    return {"rows": data_list, "cols": col_list, "images": images_to_data(ws)}
 
 
 def render_table(data, append_headers, append_lineno):
     html = [
-        '<table  '
+        "<table  "
         'style="border-collapse: collapse" '
         'border="0" '
         'cellspacing="0" '
         'cellpadding="0">'
-        '<colgroup>'
+        "<colgroup>"
     ]
     hidden_columns = set()
-    for col in data['cols']:
-        if col['hidden']:
-            hidden_columns.add(col['index'])
-        html.append('<col {attrs} style="{styles}">'.format(
-            attrs=render_attrs(col.get('attrs')),
-            styles=render_inline_styles(col.get('style')),
-        ))
-    html.append('</colgroup>')
+    for col in data["cols"]:
+        if col["hidden"]:
+            hidden_columns.add(col["index"])
+        html.append(
+            '<col {attrs} style="{styles}">'.format(
+                attrs=render_attrs(col.get("attrs")),
+                styles=render_inline_styles(col.get("style")),
+            )
+        )
+    html.append("</colgroup>")
 
     append_headers(data, html)
 
-    for i, row in enumerate(data['rows']):
-        trow = ['<tr>']
+    for i, row in enumerate(data["rows"]):
+        trow = ["<tr>"]
         append_lineno(trow, i)
         for cell in row:
-            if cell['column'] in hidden_columns:
+            if cell["column"] in hidden_columns:
                 continue
-            images = data['images'].get((cell['column'], cell['row'])) or []
+            images = data["images"].get((cell["column"], cell["row"])) or []
             formatted_images = []
             for img in images:
-                styles = render_inline_styles(img['style'])
+                styles = render_inline_styles(img["style"])
                 img_tag = (
                     '<img width="{width}" height="{height}"'
                     'style="{styles_str}"'
                     'src="{src}"'
-                    '/>'
-                ).format(
-                    styles_str=styles, **img)
+                    "/>"
+                ).format(styles_str=styles, **img)
                 formatted_images.append(img_tag)
-            trow.append((
-                '<td {attrs_str} style="{styles_str}">'
-                '{formatted_images}'
-                '{formatted_value}'
-                '</td>'
-            ).format(
-                attrs_str=render_attrs(cell['attrs']),
-                styles_str=render_inline_styles(cell['style']),
-                formatted_images='\n'.join(formatted_images),
-                **cell))
+            trow.append(
+                (
+                    '<td {attrs_str} style="{styles_str}">'
+                    "{formatted_images}"
+                    "{formatted_value}"
+                    "</td>"
+                ).format(
+                    attrs_str=render_attrs(cell["attrs"]),
+                    styles_str=render_inline_styles(cell["style"]),
+                    formatted_images="\n".join(formatted_images),
+                    **cell,
+                )
+            )
 
-        trow.append('</tr>')
-        html.append('\n'.join(trow))
-    html.append('</table>')
-    return '\n'.join(html)
+        trow.append("</tr>")
+        html.append("\n".join(trow))
+    html.append("</table>")
+    return "\n".join(html)
 
 
 def render_data_to_html(data, append_headers, append_lineno):
-    html = '''
+    html = """
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -322,7 +324,7 @@ def render_data_to_html(data, append_headers, append_lineno):
         %s
     </body>
     </html>
-    '''
+    """
     return html % render_table(data, append_headers, append_lineno)
 
 
@@ -336,11 +338,16 @@ def get_sheet(wb, sheet):
     return ws
 
 
-def xlsx2html(filepath, output=None, locale='en',
-              sheet=None, parse_formula=False,
-              append_headers=(lambda dumb1, dumb2: True),
-              append_lineno=(lambda dumb1, dumb2: True),
-              default_cell_border="none"):
+def xlsx2html(
+    filepath,
+    output=None,
+    locale="en",
+    sheet=None,
+    parse_formula=False,
+    append_headers=(lambda dumb1, dumb2: True),
+    append_lineno=(lambda dumb1, dumb2: True),
+    default_cell_border="none",
+):
     wb = openpyxl.load_workbook(filepath, data_only=True)
     ws = get_sheet(wb, sheet)
 
@@ -349,12 +356,15 @@ def xlsx2html(filepath, output=None, locale='en',
         fb = openpyxl.load_workbook(filepath, data_only=False)
         fs = get_sheet(fb, sheet)
 
-    data = worksheet_to_data(ws, locale=locale, fs=fs, default_cell_border=default_cell_border)
+    data = worksheet_to_data(
+        ws, locale=locale, fs=fs, default_cell_border=default_cell_border
+    )
     html = render_data_to_html(data, append_headers, append_lineno)
 
     if not output:
         output = io.StringIO()
     if isinstance(output, str):
-        output = open(output, 'w')
+        output = open(output, "w")
     output.write(html)
+    output.flush()
     return output

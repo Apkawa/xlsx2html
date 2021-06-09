@@ -1,20 +1,23 @@
 -e .
 # Build
 bumpversion==0.5.3
-wheel==0.33.6
+wheel>=0.36.2
 twine>=1.15.0
 setuptools>=42
 # Test
 tox==3.14.2
+tox-pyenv==1.1.0
 pytest==6.2.4
 pytest-flake8==1.0.7
 pytest-cov==2.12.1
 pytest-splinter==3.3.1
 chromedriver-binary==2.40.1
 diffimg==0.2.3
-mypy==0.782
+#mypy>=0.901
 pytest-image-diff>=0.0.2
 # Docs
 recommonmark
 Sphinx
 alabaster
+# QA
+pre-commit==2.13.0

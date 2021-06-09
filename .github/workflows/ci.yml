@@ -17,15 +17,20 @@ jobs:
         include:
           - toxenv: qa
             python-version: 3.7
-            experimental: true
+            experimental: false
           - toxenv: type
             python-version: 3.7
-            experimental: true
+            experimental: false
           - toxenv: py37-openpyxl24
             experimental: false
             python-version: 3.7
           - experimental: true
-            python-version: "3.10.0-beta.2"
+            python-version: "3.10.x"
+          - experimental: true
+            python-version: "pypy-3.7"
+          - experimental: true
+            python-version: "pypy-3.x"
+
     continue-on-error: ${{ matrix.experimental }}
     env:
       TOXENV: ${{ matrix.toxenv }}
@@ -46,5 +51,3 @@ jobs:
       - uses: codecov/codecov-action@v1
         with:
           env_vars: OS,PYTHON,TOXENV
-
-

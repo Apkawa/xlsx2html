@@ -4,7 +4,7 @@ from xlsx2html.utils.cell import parse_cell_location
 
 
 class HyperlinkType:
-    __slots__ = ['location', 'target', 'title']
+    __slots__ = ["location", "target", "title"]
 
     def __init__(self, location=None, target=None, title=None):
         self.location = location
@@ -16,21 +16,21 @@ class HyperlinkType:
 
 
 def resolve_cell(worksheet, coord):
-    if '!' in coord:
-        sheet_name, coord = coord.split('!', 1)
-        worksheet = worksheet.parent[sheet_name.lstrip('$')]
+    if "!" in coord:
+        sheet_name, coord = coord.split("!", 1)
+        worksheet = worksheet.parent[sheet_name.lstrip("$")]
     return worksheet[coord]
 
 
 def resolve_hyperlink_formula(cell, f_cell):
-    if not f_cell or f_cell.data_type != 'f' or not f_cell.value.startswith('='):
+    if not f_cell or f_cell.data_type != "f" or not f_cell.value.startswith("="):
         return None
     tokens = Tokenizer(f_cell.value).items
     if not tokens:
         return None
     hyperlink = HyperlinkType(title=cell.value)
     func_token = tokens[0]
-    if func_token.type == Token.FUNC and func_token.value == 'HYPERLINK(':
+    if func_token.type == Token.FUNC and func_token.value == "HYPERLINK(":
         target_token = tokens[1]
         if target_token.type == Token.OPERAND:
             target = target_token.value
@@ -60,7 +60,7 @@ def format_hyperlink(value, cell, f_cell=None):
             return value
 
     if hyperlink.location is not None:
-        href = "{}#{}".format(hyperlink.target or '', hyperlink.location)
+        href = "{}#{}".format(hyperlink.target or "", hyperlink.location)
     else:
         href = hyperlink.target
 
@@ -68,9 +68,8 @@ def format_hyperlink(value, cell, f_cell=None):
     if href.startswith("#"):
         location_info = parse_cell_location(href)
         if location_info:
-            href = '#{}.{}'.format(
-                location_info['sheet_name'] or cell.parent.title,
-                location_info['coord']
+            href = "#{}.{}".format(
+                location_info["sheet_name"] or cell.parent.title, location_info["coord"]
             )
 
     return '<a href="{href}">{value}</a>'.format(href=href, value=value)

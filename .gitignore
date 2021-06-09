@@ -1,3 +1,5 @@
+venv*/
+.tests/
 # Created by .ignore support plugin (hsz.mobi)
 .idea
 .cache
@@ -10,6 +12,7 @@ __pycache__/
 .tests/
 Pipfile
 Pipfile.lock
+
 
 # C extensions
 *.so
