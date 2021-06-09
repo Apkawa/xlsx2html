@@ -6,27 +6,28 @@ addons:
   chrome: stable
 
 python:
-    - "3.6"
-    - "3.7"
-    - "3.8"
-    - "3.9"
-    - "3.10-dev"
-    - "nightly"
-    - "pypy3"
+  - "3.6"
+  - "3.7"
+  - "3.8"
+  - "3.9"
+  - "3.10-dev"
+  - "nightly"
+  - "pypy3"
 
 matrix:
-    fast_finish: true
-    include:
-        - env: TOXENV=qa
-          python: 3.7
-        - env: TOXENV=type
-          python: 3.7
-        - env: TOXENV=py37-openpyxl24
-          python: 3.7
+  fast_finish: true
+  include:
+    - env: TOXENV=qa
+      python: 3.7
+    - env: TOXENV=type
+      python: 3.7
+    - env: TOXENV=py37-openpyxl24
+      python: 3.7
 
-    allow_failures:
-        - python: "3.10-dev"
-        - python: "nightly"
+  allow_failures:
+    - python: "pypy3"
+    - python: "3.10-dev"
+    - python: "nightly"
 
 install: pip install tox-travis python-coveralls codecov
 script: tox

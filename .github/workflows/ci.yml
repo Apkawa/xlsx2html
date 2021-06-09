@@ -25,11 +25,10 @@ jobs:
             experimental: false
             python-version: 3.7
           - experimental: true
-            python-version: "3.10.x"
+            python-version: "3.10.0-beta.2 - 3.10"
           - experimental: true
             python-version: "pypy-3.7"
-          - experimental: true
-            python-version: "pypy-3.x"
+
 
     continue-on-error: ${{ matrix.experimental }}
     env:
