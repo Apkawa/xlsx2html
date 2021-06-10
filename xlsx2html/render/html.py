@@ -14,7 +14,7 @@ class HtmlRenderer:
     def __init__(
         self,
         display_grid: bool = False,
-        default_border_style: Optional[StyleType] = None,
+        default_border_style: Optional[Union[StyleType, str]] = None,
         table_attrs: Optional[StyleType] = None,
         optimize_styles: bool = False,
     ):
@@ -38,16 +38,20 @@ class HtmlRenderer:
         """
         return html % self.render_table(result)
 
-    def render_table(self, result: ParserResult) -> str:
-        attrs: StyleType = dict(border="0", cellspacing="0", cellpadding="0")
-        attrs.update(self.table_attrs)
+    def render_table(
+        self, result: ParserResult, attrs: Optional[StyleType] = None
+    ) -> str:
+
+        t_attrs: StyleType = dict(border="0", cellspacing="0", cellpadding="0")
+        t_attrs.update(self.table_attrs)
+        t_attrs.update(attrs or {})
 
         self._build_style_cache(result.rows)
 
         h = [
             "<table  "
             'style="border-collapse: collapse" '
-            f"{render_attrs(attrs)}"
+            f"{render_attrs(t_attrs)}"
             ">",
             self.render_columns(result.cols),
         ]
@@ -91,21 +95,26 @@ class HtmlRenderer:
     def render_column(self, col: Column) -> str:
         return f'<col style="width: {col.width}px"/>'
 
-    def render_cell(self, cell: CellInfo, images: List[ImageInfo]):
+    def render_cell(
+        self, cell: CellInfo, images: List[ImageInfo], attrs: Optional[StyleType] = None
+    ) -> str:
+
         formatted_images = "\n".join([self.render_image(img) for img in images])
 
-        attrs = {"id": cell.id, "colspan": cell.colspan, "rowspan": cell.rowspan}
+        c_attrs = {"id": cell.id, "colspan": cell.colspan, "rowspan": cell.rowspan}
 
         class_name = self._cell_style_map[cell.coordinate]
         if self.optimize_styles:
-            attrs["class"] = class_name
+            c_attrs["class"] = class_name
         else:
-            attrs["style"] = self._style_hash_map[class_name]
+            c_attrs["style"] = self._style_hash_map[class_name]
+
+        c_attrs.update(attrs or {})
 
         return (
             "<td {attrs_str}>" "{formatted_images}" "{formatted_value}" "</td>"
         ).format(
-            attrs_str=render_attrs(attrs),
+            attrs_str=render_attrs(c_attrs),
             formatted_images=formatted_images,
             formatted_value=cell.formatted_value,
         )
@@ -121,6 +130,9 @@ class HtmlRenderer:
             if not border_style and b.style:
                 border_style = cast(StyleType, DEFAULT_BORDER_STYLE)
             elif not b.style:
+                if isinstance(self.default_border_style, str):
+                    # Maybe shortland
+                    return {prefix: self.default_border_style}
                 border_style = self.default_border_style
 
             for k, v in border_style.items():
@@ -139,12 +151,15 @@ class HtmlRenderer:
                 style.update(_get_border_style(b_s, f"border-{b_dir}"))
         return style
 
-    def get_styles_from_cell(self, cell: CellInfo) -> StyleType:
+    def get_styles_from_cell(
+        self, cell: CellInfo, extra_style: Optional[StyleType] = None
+    ) -> StyleType:
         h_styles: StyleType = {
             "border-collapse": "collapse",
             "height": f"{cell.height}pt",
         }
         h_styles.update(self.get_border_style_from_cell(cell))
+        h_styles.update(extra_style or {})
 
         if cell.textAlign:
             h_styles["text-align"] = cell.textAlign

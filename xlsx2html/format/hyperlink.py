@@ -3,6 +3,7 @@ from typing import Union, Optional
 
 from openpyxl.cell import Cell
 from openpyxl.formula.tokenizer import Tokenizer, Token
+from openpyxl.worksheet.worksheet import Worksheet
 
 from xlsx2html.utils.cell import parse_cell_location
 
@@ -18,7 +19,7 @@ class Hyperlink:
         return bool(self.location or self.target)
 
 
-def resolve_cell(worksheet, coord):
+def resolve_cell(worksheet: Worksheet, coord: str) -> Cell:
     if "!" in coord:
         sheet_name, coord = coord.split("!", 1)
         worksheet = worksheet.parent[sheet_name.lstrip("$")]
@@ -83,7 +84,7 @@ def get_hyperlink(
     return hyperlink
 
 
-def format_hyperlink(value, cell, f_cell=None):
+def format_hyperlink(value: str, cell: Cell, f_cell: Optional[Cell] = None) -> str:
     hyperlink = get_hyperlink(value, cell, f_cell)
 
     if not hyperlink:

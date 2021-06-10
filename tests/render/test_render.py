@@ -43,9 +43,7 @@ def test_optimize_style(fixture_file, temp_file, browser, screenshot_regression)
     result = parser.get_sheet()
 
     render = HtmlRenderer(
-        display_grid=True,
-        optimize_styles=True,
-        default_border_style={"style": "solid", "color": "gray", "width": "0.5px"},
+        display_grid=True, optimize_styles=True, default_border_style="0.5px solid gray"
     )
 
     html = render.render(result)
