@@ -3,6 +3,7 @@ from typing import Optional, Union, Any
 
 from openpyxl.cell import Cell
 
+from xlsx2html.compat import OPENPYXL_24
 from xlsx2html.utils.cell import get_cell_id
 from xlsx2html.utils.color import normalize_color
 from xlsx2html.format import format_cell
@@ -61,11 +62,19 @@ class CellInfo:
     def from_cell(
         cls, cell: Cell, f_cell: Optional[Cell], _locale: Optional[str] = None
     ) -> "CellInfo":
+
+        if OPENPYXL_24:
+            col_idx = cell.col_idx
+            col_letter = cell.column
+        else:
+            col_idx = cell.column
+            col_letter = cell.column_letter
+
         cell_info = CellInfo(
             id=get_cell_id(cell),
             row=cell.row,
-            column=cell.column,
-            column_letter=cell.column_letter,
+            column=col_idx,
+            column_letter=col_letter,
             coordinate=cell.coordinate,
             value=cell.value,
             formatted_value=format_cell(cell, locale=_locale, f_cell=f_cell),
