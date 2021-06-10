@@ -1,10 +1,11 @@
 from typing import List, Dict, Optional, Union, cast
 
 from xlsx2html.constants.border import DEFAULT_BORDER_STYLE, BORDER_STYLES
-from xlsx2html.utils.render import render_attrs, render_inline_styles
 from xlsx2html.parser.cell import CellInfo, Border
 from xlsx2html.parser.image import ImageInfo
 from xlsx2html.parser.parser import Column, ParserResult
+from xlsx2html.utils import hash_str
+from xlsx2html.utils.render import render_attrs, render_inline_styles
 
 StyleType = Dict[str, Union[str, None]]
 
@@ -14,9 +15,13 @@ class HtmlRenderer:
         self,
         display_grid: bool = False,
         default_border_style: Optional[StyleType] = None,
+        table_attrs: Optional[StyleType] = None,
+        optimize_styles: bool = False,
     ):
         self.default_border_style = default_border_style or {}
         self.display_grid = display_grid
+        self.table_attrs = table_attrs or {}
+        self.optimize_styles = optimize_styles
 
     def render(self, result: ParserResult) -> str:
         html = """
@@ -34,12 +39,16 @@ class HtmlRenderer:
         return html % self.render_table(result)
 
     def render_table(self, result: ParserResult) -> str:
+        attrs: StyleType = dict(border="0", cellspacing="0", cellpadding="0")
+        attrs.update(self.table_attrs)
+
+        self._build_style_cache(result.rows)
+
         h = [
             "<table  "
             'style="border-collapse: collapse" '
-            'border="0" '
-            'cellspacing="0" '
-            'cellpadding="0">',
+            f"{render_attrs(attrs)}"
+            ">",
             self.render_columns(result.cols),
         ]
 
@@ -56,13 +65,15 @@ class HtmlRenderer:
             trow.append("</tr>")
             h.append("\n".join(trow))
         h.append("</table>")
+        if self.optimize_styles:
+            h.append(self.render_css())
         return "\n".join(h)
 
     def render_header(self, cols: List[Column]) -> str:
         h = ["<thead><tr><td></td>"]
 
         for col in cols:
-            h.append(f"<th>{col.letter}<th>")
+            h.append(f"<th>{col.letter}</th>")
         h.append("</tr></thead>")
         return "\n".join(h)
 
@@ -85,16 +96,16 @@ class HtmlRenderer:
 
         attrs = {"id": cell.id, "colspan": cell.colspan, "rowspan": cell.rowspan}
 
-        styles = self.get_styles_from_cell(cell)
+        class_name = self._cell_style_map[cell.coordinate]
+        if self.optimize_styles:
+            attrs["class"] = class_name
+        else:
+            attrs["style"] = self._style_hash_map[class_name]
 
         return (
-            '<td {attrs_str} style="{styles_str}">'
-            "{formatted_images}"
-            "{formatted_value}"
-            "</td>"
+            "<td {attrs_str}>" "{formatted_images}" "{formatted_value}" "</td>"
         ).format(
             attrs_str=render_attrs(attrs),
-            styles_str=render_inline_styles(styles),
             formatted_images=formatted_images,
             formatted_value=cell.formatted_value,
         )
@@ -168,3 +179,26 @@ class HtmlRenderer:
             f'src="{image.src}"'
             "/>"
         )
+
+    def _build_style_cache(self, rows: List[List[CellInfo]]) -> None:
+        cell_style_map: Dict[str, str] = {}
+        style_hash_map: Dict[str, str] = {}
+
+        for row in rows:
+            for cell in row:
+                style = self.get_styles_from_cell(cell)
+                style_str = render_inline_styles(style)
+                class_name = "td-" + hash_str(style_str)
+                style_hash_map[class_name] = style_str
+                cell_style_map[cell.coordinate] = class_name
+
+        self._cell_style_map = cell_style_map
+        self._style_hash_map = style_hash_map
+
+    def render_css(self) -> str:
+        css = []
+        for c_name, style in self._style_hash_map.items():
+            css.append(f"td.{c_name} {{ {style} }}")
+        css_str = "\n".join(css)
+        # TODO add compress css
+        return f'<style type="text/css">{css_str}</style>'

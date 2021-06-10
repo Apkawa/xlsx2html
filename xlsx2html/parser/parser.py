@@ -127,7 +127,6 @@ class WBParser:
 
                 data_row.append(cell_data)
 
-        max_col_number += 1
         col_list = self.get_columns(ws, max_col_number)
 
         # Remove hidden columns
@@ -161,6 +160,8 @@ class WBParser:
 
             index = letter_to_col_index(col_dim.index)
             for i in six.moves.range((col_dim.max - col_dim.min) + 1):
+                if max_col_number < 0:
+                    break
                 max_col_number -= 1
                 new_index = index + i
                 letter = col_index_to_letter(new_index)
@@ -172,8 +173,6 @@ class WBParser:
                         width=col_width,
                     )
                 )
-                if max_col_number < 0:
-                    break
         return col_list
 
     @staticmethod

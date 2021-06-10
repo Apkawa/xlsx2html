@@ -41,7 +41,9 @@ class Font:
 class CellInfo:
     id: str
     column: int
+    column_letter: str
     row: int
+    coordinate: str
     value: Any
     formatted_value: str
     # hyperlink: Optional[Hyperlink] = None
@@ -63,6 +65,8 @@ class CellInfo:
             id=get_cell_id(cell),
             row=cell.row,
             column=cell.column,
+            column_letter=cell.column_letter,
+            coordinate=cell.coordinate,
             value=cell.value,
             formatted_value=format_cell(cell, locale=_locale, f_cell=f_cell),
         )
