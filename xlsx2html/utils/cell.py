@@ -1,5 +1,8 @@
 import re
 
+from openpyxl.cell import Cell
+from openpyxl.utils import get_column_letter, column_index_from_string
+
 CELL_LOCATION_RE = re.compile(
     r"""
     ^
@@ -15,7 +18,7 @@ CELL_LOCATION_RE = re.compile(
 )
 
 
-def parse_cell_location(cell_location):
+def parse_cell_location(cell_location: str):
     """
     >>> parse_cell_location("#Sheet1.C1")
     {'sheet_name': 'Sheet1', 'coord': 'C1'}
@@ -30,3 +33,15 @@ def parse_cell_location(cell_location):
         return None
 
     return m.groupdict()
+
+
+def col_index_to_letter(col_index: int) -> str:
+    return get_column_letter(col_index)
+
+
+def letter_to_col_index(col_letter: str) -> int:
+    return column_index_from_string(col_letter)
+
+
+def get_cell_id(cell: Cell) -> str:
+    return "{}!{}".format(cell.parent.title, cell.coordinate)

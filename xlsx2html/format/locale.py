@@ -1,4 +1,5 @@
 import re
+from typing import Optional, Tuple, Union
 
 from babel import Locale, UnknownLocaleError
 
@@ -16,7 +17,7 @@ LOCALE_FORMAT_RE = re.compile(
 )
 
 
-def parse_locale_code(code):
+def parse_locale_code(code: str) -> Optional[str]:
     """
     >>> parse_locale_code('-404')
     'zh_Hant_TW'
@@ -34,7 +35,7 @@ def parse_locale_code(code):
         return None
 
 
-def extract_locale_from_format(fmt):
+def extract_locale_from_format(fmt: str) -> Tuple[Union[str, None], str]:
     """
     >>> extract_locale_from_format('[$-404]e/m/d')
     ('zh_Hant_TW', 'e/m/d')

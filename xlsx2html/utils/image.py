@@ -4,10 +4,6 @@ import mimetypes
 from typing.io import BinaryIO
 
 
-class FileNotFoundError(Exception):
-    pass
-
-
 def bytes_to_datauri(fp: BinaryIO, name):
     """Convert a file (specified by a path) into a data URI."""
     mime, _ = mimetypes.guess_type(name)

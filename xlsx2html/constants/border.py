@@ -1,4 +1,5 @@
 DEFAULT_BORDER_STYLE = {"style": "solid", "width": "1px"}
+
 BORDER_STYLES = {
     "dashDot": None,
     "dashDotDot": None,

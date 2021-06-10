@@ -1,5 +1,6 @@
 import re
 from decimal import Decimal
+from typing import Union, Any
 
 from babel import Locale
 from babel.numbers import NumberPattern, number_re, parse_grouping, LC_NUMERIC
@@ -27,13 +28,11 @@ class ColorNumberPattern(NumberPattern):
 
         self.prefix = [COLOR_FORMAT.sub("", p) for p in self.prefix]
 
-    def apply(self, value, locale, currency=None, force_frac=None):
-        formatted = super(ColorNumberPattern, self).apply(
-            value, locale, currency, force_frac
-        )
+    def apply(self, value, locale: Union[str, Locale], **kwargs) -> str:
+        formatted = super(ColorNumberPattern, self).apply(value, locale, **kwargs)
         return self.apply_color(value, formatted)
 
-    def apply_color(self, value, formatted):
+    def apply_color(self, value: Any, formatted: str) -> str:
         if not isinstance(value, Decimal):
             value = Decimal(str(value))
         value = value.scaleb(self.scale)

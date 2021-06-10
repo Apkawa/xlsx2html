@@ -23,6 +23,13 @@ def test_xlsx2html(temp_file):
     assert result_html
 
 
+def test_xlsx2html_benchmarked(benchmark):
+    out_file = benchmark(xlsx2html, XLSX_FILE, locale="en")
+    out_file.seek(0)
+    result_html = out_file.read()
+    assert result_html
+
+
 def test_use_streams():
     xlsx_file = open(XLSX_FILE, "rb")
     out_file = io.StringIO()
@@ -50,9 +57,10 @@ def test_hyperlink(temp_file):
 
 
 @pytest.mark.webtest()
-def test_screenshot_diff(temp_file, browser, screenshot_regression):
+def test_screenshot_diff(temp_file, browser, screenshot_regression, fixture_file):
     browser.driver.set_window_size(1280, 1024)
     out_file = temp_file()
     xlsx2html(XLSX_FILE, out_file, locale="en")
+
     browser.visit("file://" + out_file)
     screenshot_regression()
