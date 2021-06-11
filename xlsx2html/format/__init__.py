@@ -1,8 +1,10 @@
 import datetime
+from typing import Optional
 
 import six
 from babel.dates import LC_TIME
 from babel.numbers import LC_NUMERIC
+from openpyxl.cell import Cell
 
 from xlsx2html.constants import BUILTIN_FORMATS
 from .dt import format_time, format_datetime, format_date, format_timedelta
@@ -11,7 +13,7 @@ from .locale import extract_locale_from_format
 from .number import format_decimal
 
 
-def format_cell(cell, locale=None, f_cell=None):
+def format_cell(cell: Cell, locale: Optional[str] = None, f_cell: Optional[Cell] = None) -> str:
     value = cell.value
     formatted_value = value or "&nbsp;"
     cell_format = cell.number_format

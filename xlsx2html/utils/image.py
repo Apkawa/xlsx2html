@@ -4,7 +4,7 @@ import mimetypes
 from typing.io import BinaryIO
 
 
-def bytes_to_datauri(fp: BinaryIO, name):
+def bytes_to_datauri(fp: BinaryIO, name: str) -> str:
     """Convert a file (specified by a path) into a data URI."""
     mime, _ = mimetypes.guess_type(name)
     fp.seek(0)

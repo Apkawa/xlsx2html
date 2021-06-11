@@ -15,7 +15,7 @@ class Hyperlink:
     target: Optional[str] = None
     href: Optional[str] = None
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return bool(self.location or self.target)
 
 
@@ -26,9 +26,7 @@ def resolve_cell(worksheet: Worksheet, coord: str) -> Cell:
     return worksheet[coord]
 
 
-def resolve_hyperlink_formula(
-    cell: Cell, f_cell: Optional[Cell] = None
-) -> Union[Hyperlink, None]:
+def resolve_hyperlink_formula(cell: Cell, f_cell: Optional[Cell] = None) -> Union[Hyperlink, None]:
     if not f_cell or f_cell.data_type != "f" or not f_cell.value.startswith("="):
         return None
     tokens = Tokenizer(f_cell.value).items
@@ -51,9 +49,7 @@ def resolve_hyperlink_formula(
     return None
 
 
-def get_hyperlink(
-    value: str, cell: Cell, f_cell: Optional[Cell] = None
-) -> Union[Hyperlink, None]:
+def get_hyperlink(value: str, cell: Cell, f_cell: Optional[Cell] = None) -> Union[Hyperlink, None]:
     hyperlink = Hyperlink(title=value)
 
     if cell.hyperlink:
@@ -90,6 +86,4 @@ def format_hyperlink(value: str, cell: Cell, f_cell: Optional[Cell] = None) -> s
     if not hyperlink:
         return value
 
-    return '<a href="{href}">{value}</a>'.format(
-        href=hyperlink.href, value=hyperlink.title
-    )
+    return '<a href="{href}">{value}</a>'.format(href=hyperlink.href, value=hyperlink.title)

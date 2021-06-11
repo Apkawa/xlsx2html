@@ -1,6 +1,6 @@
 import re
 from decimal import Decimal
-from typing import Union, Any, Optional
+from typing import Union, Any, Optional, Tuple, cast, Dict
 
 from babel import Locale
 from babel.numbers import NumberPattern, number_re, parse_grouping, LC_NUMERIC
@@ -14,7 +14,7 @@ COLOR_FORMAT = re.compile(r"\[([A-Z]+)\]", re.IGNORECASE)
 
 
 class ColorNumberPattern(NumberPattern):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):  # type: ignore
         super(ColorNumberPattern, self).__init__(*args, **kwargs)
         self.pos_color = self.neg_color = None
         try:
@@ -28,7 +28,7 @@ class ColorNumberPattern(NumberPattern):
 
         self.prefix = [COLOR_FORMAT.sub("", p) for p in self.prefix]
 
-    def apply(self, value, locale: Union[str, Locale], **kwargs) -> str:
+    def apply(self, value: Any, locale: Union[str, Locale], **kwargs) -> str:  # type: ignore
         formatted = super(ColorNumberPattern, self).apply(value, locale, **kwargs)
         return self.apply_color(value, formatted)
 
@@ -46,17 +46,17 @@ class ColorNumberPattern(NumberPattern):
 
 
 class PatternParser:
-    def __init__(self, pattern):
+    def __init__(self, pattern: str):
         self.general_pattern = None
         self.by_sign_pattern = None
 
-        def _match_number(pattern):
+        def _match_number(pattern: str) -> Dict:
             rv = number_re.search(pattern)
             if rv is None:
                 raise ValueError("Invalid number pattern %r" % pattern)
             return rv.groups()
 
-        def parse_precision(p):
+        def parse_precision(p: str) -> Tuple[int, int]:
             """Calculate the min and max allowed digits"""
             min = max = 0
             for c in p:
@@ -71,32 +71,32 @@ class PatternParser:
                     break
             return min, max
 
-        def generate_color_number_pattern(pattern, number, prefix, suffix):
+        def generate_color_number_pattern(
+            pattern: str, number: str, prefix: Tuple[str, str], suffix: Tuple[str, str]
+        ) -> Union[str, ColorNumberPattern]:
             (grouping, int_prec, frac_prec, exp_prec, exp_plus) = handle_number(number)
             if number != "":
                 return ColorNumberPattern(
-                    pattern,
-                    prefix,
-                    suffix,
-                    grouping,
-                    int_prec,
-                    frac_prec,
-                    exp_prec,
-                    exp_plus,
-                )
+                    pattern, prefix, suffix, grouping, int_prec, frac_prec, exp_prec, exp_plus
+                )  # types: ignore
             else:
                 return pattern
 
-        def handle_number(number):
+        def handle_number(
+            number: str
+        ) -> Tuple[
+            Tuple[int, int],
+            Tuple[int, int],
+            Tuple[int, int],
+            Optional[Tuple[int, int]],
+            Optional[bool],
+        ]:
+            exp: Optional[str] = None
             if "E" in number:
                 number, exp = number.split("E", 1)
-            else:
-                exp = None
             if "@" in number:
                 if "." in number and "0" in number:
-                    raise ValueError(
-                        "Significant digit patterns can not contain " '"@" or "0"'
-                    )
+                    raise ValueError("Significant digit patterns can not contain " '"@" or "0"')
             if "." in number:
                 integer, fraction = number.rsplit(".", 1)
             else:
@@ -105,15 +105,15 @@ class PatternParser:
 
             int_prec = parse_precision(integer)
             frac_prec = parse_precision(fraction)
+
+            exp_prec: Optional[Tuple[int, int]] = None
+            exp_plus: Optional[bool] = None
             if exp:
                 frac_prec = parse_precision(integer + fraction)
                 exp_plus = exp.startswith("+")
                 exp = exp.lstrip("+")
                 exp_prec = parse_precision(exp)
-            else:
-                exp_plus = None
-                exp_prec = None
-            grouping = parse_grouping(integer)
+            grouping = cast(Tuple[int, int], parse_grouping(integer))
             return (grouping, int_prec, frac_prec, exp_prec, exp_plus)
 
         """Parse number format patterns"""
@@ -151,10 +151,10 @@ class PatternParser:
                 pattern, number, (pos_prefix, neg_prefix), (pos_suffix, neg_suffix)
             )
 
-    def apply(self, number, locale):
+    def apply(self, number: int, locale: str) -> str:
         if self.general_pattern:
             pattern = self.general_pattern
-        else:
+        elif self.by_sign_pattern:
             pos_pattern, neg_pattern, zero_pattern = self.by_sign_pattern
 
             pattern = zero_pattern
@@ -170,7 +170,7 @@ class PatternParser:
             return pattern.apply(number, locale)
 
 
-def format_decimal(number, format: Optional[str] = None, locale: str = LC_NUMERIC):
+def format_decimal(number: Any, format: Optional[str] = None, locale: str = LC_NUMERIC) -> str:
     """Return the given decimal number formatted for a specific locale.
 
     >>> format_decimal(1.2345, locale='en_US')
@@ -196,7 +196,7 @@ def format_decimal(number, format: Optional[str] = None, locale: str = LC_NUMERI
     :param locale: the `Locale` object or locale identifier
     """
     _locale = Locale.parse(locale)
-    if not format:
+    if format is None:
         format = _locale.decimal_formats.get(format)
     pattern = PatternParser(format)
     return pattern.apply(number, locale)

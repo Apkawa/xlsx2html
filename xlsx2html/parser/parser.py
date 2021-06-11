@@ -63,9 +63,7 @@ class XLSXParser:
             merged_cell_ranges = ws.merged_cell_ranges
             excluded_cells = set(ws.merged_cells)
         else:
-            merged_cell_ranges = [
-                cell_range.coord for cell_range in ws.merged_cells.ranges
-            ]
+            merged_cell_ranges = [cell_range.coord for cell_range in ws.merged_cells.ranges]
             excluded_cells = set(
                 [
                     cell
@@ -124,9 +122,7 @@ class XLSXParser:
                     cell_data.rowspan = merged_cell_info.rowspan
 
                 if merged_cell_info:
-                    cell_data.border = self.merge_borders(
-                        [cell] + merged_cell_info.cells
-                    )
+                    cell_data.border = self.merge_borders([cell] + merged_cell_info.cells)
 
                 data_row.append(cell_data)
 
@@ -169,12 +165,7 @@ class XLSXParser:
                 new_index = index + i
                 letter = col_index_to_letter(new_index)
                 col_list.append(
-                    Column(
-                        index=new_index,
-                        letter=letter,
-                        hidden=col_dim.hidden,
-                        width=col_width,
-                    )
+                    Column(index=new_index, letter=letter, hidden=col_dim.hidden, width=col_width)
                 )
         return col_list
 

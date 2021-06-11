@@ -1,4 +1,5 @@
 import re
+from typing import Dict, Optional
 
 from openpyxl.cell import Cell
 from openpyxl.utils import get_column_letter, column_index_from_string
@@ -18,7 +19,7 @@ CELL_LOCATION_RE = re.compile(
 )
 
 
-def parse_cell_location(cell_location: str):
+def parse_cell_location(cell_location: str) -> Optional[Dict]:
     """
     >>> parse_cell_location("#Sheet1.C1")
     {'sheet_name': 'Sheet1', 'coord': 'C1'}

@@ -1,6 +1,6 @@
 import io
 from dataclasses import dataclass, InitVar
-from typing import Optional, Union, TextIO, List, BinaryIO, cast
+from typing import Optional, Union, TextIO, List, BinaryIO, cast, Iterable
 
 from xlsx2html.parser.parser import XLSXParser
 from xlsx2html.parser.utils import SheetNameType
@@ -52,7 +52,9 @@ class XLSX2HTMLConverter:
     parser: InitVar[XLSXParser] = None
     renderer: InitVar[HtmlRenderer] = None
 
-    def __post_init__(self, parser, renderer):
+    def __post_init__(
+        self, parser: Optional[XLSXParser], renderer: Optional[HtmlRenderer]
+    ) -> None:
         self.parser: XLSXParser = parser or XLSXParser(
             filepath=self.filepath, parse_formula=self.parse_formula, locale=self.locale
         )
@@ -87,20 +89,18 @@ class XLSX2HTMLConverter:
 
     def get_tables(
         self,
-        sheets: Optional[List[SheetNameType]] = None,
+        sheets: Optional[Iterable[SheetNameType]] = None,
         extra_attrs: Optional[StyleType] = None,
     ) -> List[ConverterTableResult]:
         """
 
         :param sheets: list of sheet name or idx. By defaults get all sheets
-        :param extra_attrs: additional attributes for `<table>` like class or id
+        :param extra_attrs: additional attributes to `<table ...>` like class or id
         :return:
         """
         if sheets is None:
             sheets = cast(List[SheetNameType], self.parser.get_sheet_names())
-        return [
-            self.get_table(sheet, extra_attrs=extra_attrs) for sheet in sheets or []
-        ]
+        return [self.get_table(sheet, extra_attrs=extra_attrs) for sheet in sheets or []]
 
     def get_html(self, sheet: SheetNameType = None) -> str:
         """
@@ -111,9 +111,7 @@ class XLSX2HTMLConverter:
         result = self.parser.get_sheet(sheet)
         return self.renderer.render(result)
 
-    def get_html_stream(
-        self, output: OutputType, sheet: SheetNameType = None
-    ) -> TextIO:
+    def get_html_stream(self, output: OutputType, sheet: SheetNameType = None) -> TextIO:
         """
         :param output: to path or file like, defaults to `None`
         :param sheet: sheet name or idx, defaults to `None` what means get active sheet

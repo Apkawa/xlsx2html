@@ -45,18 +45,13 @@ class HtmlRenderer:
             h.append(css_tag)
         return html % "\n".join(h)
 
-    def render_table(
-        self, result: ParserResult, attrs: Optional[StyleType] = None
-    ) -> str:
+    def render_table(self, result: ParserResult, attrs: Optional[StyleType] = None) -> str:
 
         t_attrs: StyleType = dict(border="0", cellspacing="0", cellpadding="0")
         t_attrs.update(self.table_attrs)
         t_attrs.update(attrs or {})
         h = [
-            "<table  "
-            'style="border-collapse: collapse" '
-            f"{render_attrs(t_attrs)}"
-            ">",
+            "<table  " 'style="border-collapse: collapse" ' f"{render_attrs(t_attrs)}" ">",
             self.render_columns(result.cols),
         ]
 
@@ -113,9 +108,7 @@ class HtmlRenderer:
 
         c_attrs.update(attrs or {})
 
-        return (
-            "<td {attrs_str}>" "{formatted_images}" "{formatted_value}" "</td>"
-        ).format(
+        return ("<td {attrs_str}>" "{formatted_images}" "{formatted_value}" "</td>").format(
             attrs_str=render_attrs(c_attrs),
             formatted_images=formatted_images,
             formatted_value=cell.formatted_value,
@@ -126,7 +119,7 @@ class HtmlRenderer:
         if not cell.border:
             return style
 
-        def _get_border_style(b: Border, prefix="border") -> StyleType:
+        def _get_border_style(b: Border, prefix: str = "border") -> StyleType:
             border_style: StyleType = cast(StyleType, BORDER_STYLES.get(b.style) or {})
             _style: StyleType = {}
             if not border_style and b.style:
@@ -156,10 +149,7 @@ class HtmlRenderer:
     def get_styles_from_cell(
         self, cell: CellInfo, extra_style: Optional[StyleType] = None
     ) -> StyleType:
-        h_styles: StyleType = {
-            "border-collapse": "collapse",
-            "height": f"{cell.height}pt",
-        }
+        h_styles: StyleType = {"border-collapse": "collapse", "height": f"{cell.height}pt"}
         h_styles.update(self.get_border_style_from_cell(cell))
         h_styles.update(extra_style or {})
 

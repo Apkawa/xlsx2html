@@ -7,12 +7,9 @@ from typing import Optional, List
 from babel import dates as babel_dates
 from babel.dates import LC_TIME
 
-RE_DATE_TOK = re.compile(
-    r'(?:\\[\\*_"]?|_.|\*.|y+|m+|d+|h+|s+|\.0+|am/pm|a/p|"[^"]*")', re.I
-)
+RE_DATE_TOK = re.compile(r'(?:\\[\\*_"]?|_.|\*.|y+|m+|d+|h+|s+|\.0+|am/pm|a/p|"[^"]*")', re.I)
 RE_TD_TOK = re.compile(
-    r'(?:\\[\\*_"]?|_.|\*.|\[h+\]|\[m+\]|\[s+\](?:\.0+)?|m+|s+(?:\.0+)?|h+|y+|d+|"[^"]*")',
-    re.I,
+    r'(?:\\[\\*_"]?|_.|\*.|\[h+\]|\[m+\]|\[s+\](?:\.0+)?|m+|s+(?:\.0+)?|h+|y+|d+|"[^"]*")', re.I
 )
 MAYBE_MINUTE = ["m", "mm"]
 DATE_PERIOD = ["am/pm", "a/p"]
@@ -133,10 +130,7 @@ def format_date(date: dt.date, fmt: str, locale: str = LC_TIME) -> str:
 
 
 def format_datetime(
-    datetime: dt.datetime,
-    fmt: str,
-    locale: str = LC_TIME,
-    tzinfo: Optional[dt.tzinfo] = None,
+    datetime: dt.datetime, fmt: str, locale: str = LC_TIME, tzinfo: Optional[dt.tzinfo] = None
 ) -> str:
     fmt = normalize_datetime_format(fmt)
     return babel_dates.format_datetime(datetime, fmt, locale=locale, tzinfo=tzinfo)
@@ -211,13 +205,7 @@ def format_timedelta(timedelta: dt.timedelta, fmt: str) -> str:
             if "." in tok:
                 mstok = tok.split(".")[1]
                 f = "".join(
-                    [
-                        "{:0",
-                        str(min(len(tok), 2) + len(mstok) + 1),
-                        ".",
-                        str(len(mstok)),
-                        "f}",
-                    ]
+                    ["{:0", str(min(len(tok), 2) + len(mstok) + 1), ".", str(len(mstok)), "f}"]
                 )
 
             else:
