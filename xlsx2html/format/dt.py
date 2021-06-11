@@ -18,7 +18,7 @@ MAYBE_MINUTE = ["m", "mm"]
 DATE_PERIOD = ["am/pm", "a/p"]
 
 
-def normalize_datetime_format(fmt: str, fixed_for_time=False):
+def normalize_datetime_format(fmt: str, fixed_for_time: bool = False) -> str:
     has_ap = False
     is_minute = set()
     must_minute = False
@@ -50,8 +50,8 @@ def normalize_datetime_format(fmt: str, fixed_for_time=False):
     pos = 0
     plain: List[str] = []
 
-    def clean_plain():
-        def s(m):
+    def clean_plain() -> str:
+        def s(m: re.Match) -> str:
             g = m.group().replace("'", "''")
             if not re.fullmatch(r"'*", g):
                 g = f"'{g}'"

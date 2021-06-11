@@ -1,4 +1,6 @@
-from typing import List, Dict, Optional, Union, cast
+from typing import List, Dict, Optional, cast
+
+import csscompressor
 
 from xlsx2html.constants.border import DEFAULT_BORDER_STYLE, BORDER_STYLES
 from xlsx2html.parser.cell import CellInfo, Border
@@ -6,23 +8,21 @@ from xlsx2html.parser.image import ImageInfo
 from xlsx2html.parser.parser import Column, ParserResult
 from xlsx2html.utils import hash_str
 from xlsx2html.utils.render import render_attrs, render_inline_styles
-
-StyleType = Dict[str, Union[str, None]]
-BorderType = Optional[Union[str, StyleType]]
+from xlsx2html.utils.style import compress_style, StyleType, BorderType
 
 
 class HtmlRenderer:
     def __init__(
         self,
         display_grid: bool = False,
-        default_border_style: BorderType = None,
+        default_border_style: Optional[BorderType] = None,
         table_attrs: Optional[StyleType] = None,
-        optimize_styles: bool = False,
+        inline_styles: bool = False,
     ):
         self.default_border_style = default_border_style or {}
         self.display_grid = display_grid
         self.table_attrs = table_attrs or {}
-        self.optimize_styles = optimize_styles
+        self.inline_styles = inline_styles
 
     def render(self, result: ParserResult) -> str:
         html = """
@@ -40,7 +40,7 @@ class HtmlRenderer:
 
         self.build_style_cache(result.rows)
         h = [self.render_table(result)]
-        if self.optimize_styles:
+        if not self.inline_styles:
             css_tag = f'<style type="text/css">{self.render_css() or ""}</style>'
             h.append(css_tag)
         return html % "\n".join(h)
@@ -106,7 +106,7 @@ class HtmlRenderer:
         c_attrs = {"id": cell.id, "colspan": cell.colspan, "rowspan": cell.rowspan}
 
         class_name = self._cell_style_map[cell.coordinate]
-        if self.optimize_styles:
+        if not self.inline_styles:
             c_attrs["class"] = class_name
         else:
             c_attrs["style"] = self._style_hash_map[class_name]
@@ -204,6 +204,7 @@ class HtmlRenderer:
         for row in rows:
             for cell in row:
                 style = self.get_styles_from_cell(cell)
+                style = compress_style(style)
                 style_str = render_inline_styles(style)
                 class_name = "td-" + hash_str(style_str)
                 style_hash_map[class_name] = style_str
@@ -213,7 +214,7 @@ class HtmlRenderer:
         self._style_hash_map = style_hash_map
 
     def render_css(self) -> str:
-        if not self.optimize_styles:
+        if self.inline_styles:
             return ""
 
         css = []
@@ -221,4 +222,5 @@ class HtmlRenderer:
             css.append(f"td.{c_name} {{ {style} }}")
         css_str = "\n".join(css)
         # TODO add compress css
+        css_str = csscompressor.compress(css=css_str)
         return css_str

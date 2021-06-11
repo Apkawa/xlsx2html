@@ -4,7 +4,8 @@ from typing import Optional, Union, TextIO, List, BinaryIO, cast
 
 from xlsx2html.parser.parser import XLSXParser
 from xlsx2html.parser.utils import SheetNameType
-from xlsx2html.render.html import HtmlRenderer, BorderType, StyleType
+from xlsx2html.render.html import HtmlRenderer
+from xlsx2html.utils.style import StyleType, BorderType
 
 OutputType = Optional[Union[TextIO, str]]
 FilePathType = Union[BinaryIO, str]
@@ -32,7 +33,7 @@ class XLSX2HTMLConverter:
     :param parse_formula: If `True` - enable parse formulas. defaults to `False`
     :param default_border_style: default border style. Can use short str like ``1px solid black``
         or dict like ``{'width': '1px', 'style': 'solid', 'color': 'black'}``
-    :param optimize_styles: for split inline styles in cells and render separately
+    :param inline_styles: store styles inline
     :param display_grid:
 
         Show column letters and row numbers.
@@ -44,9 +45,9 @@ class XLSX2HTMLConverter:
     filepath: FilePathType
     locale: str = "en"
     parse_formula: bool = False
-    optimize_styles: bool = False
+    inline_styles: bool = False
     display_grid: bool = False
-    default_border_style: BorderType = None
+    default_border_style: Optional[BorderType] = None
 
     parser: InitVar[XLSXParser] = None
     renderer: InitVar[HtmlRenderer] = None
@@ -57,7 +58,7 @@ class XLSX2HTMLConverter:
         )
         self.renderer: HtmlRenderer = renderer or HtmlRenderer(
             default_border_style=self.default_border_style,
-            optimize_styles=self.optimize_styles,
+            inline_styles=self.inline_styles,
             display_grid=self.display_grid,
         )
 
@@ -131,7 +132,8 @@ def xlsx2html(
     locale: str = "en",
     sheet: SheetNameType = None,
     parse_formula: bool = False,
-    default_cell_border: BorderType = None,
+    default_cell_border: Optional[BorderType] = None,
+    inline_styles: bool = False,
 ) -> TextIO:
     """
 
@@ -143,6 +145,7 @@ def xlsx2html(
     :param default_cell_border:
         default border style. Can use short str like ``1px solid black``
         or dict like ``{'width': '1px', 'style': 'solid', 'color': 'black'}``
+    :param inline_styles: store styles inline
 
     :return: File like object
     """
@@ -151,6 +154,7 @@ def xlsx2html(
         locale=locale,
         parse_formula=parse_formula,
         default_border_style=default_cell_border,
+        inline_styles=inline_styles,
     )
     output = converter.get_html_stream(output, sheet)
     return output

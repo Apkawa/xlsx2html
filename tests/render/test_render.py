@@ -22,7 +22,7 @@ def test_render_example(fixture_file, temp_file, browser, screenshot_regression)
     parser = XLSXParser(filepath=fixture_file("example.xlsx"))
     result = parser.get_sheet()
 
-    render = HtmlRenderer(display_grid=True)
+    render = HtmlRenderer(display_grid=True, inline_styles=True)
 
     html = render.render(result)
     assert html
@@ -43,7 +43,7 @@ def test_optimize_style(fixture_file, temp_file, browser, screenshot_regression)
     result = parser.get_sheet()
 
     render = HtmlRenderer(
-        display_grid=True, optimize_styles=True, default_border_style="0.5px solid gray"
+        display_grid=True, inline_styles=False, default_border_style="0.5px solid gray"
     )
 
     html = render.render(result)

@@ -32,6 +32,7 @@ pip install -e "git+https://github.com/Apkawa/xlsx2html.git#egg=xlsx2html"
 | >=3.6 | latest  |
 
 
+
 ## Usage
 
 ### Simple usage
@@ -82,7 +83,7 @@ converter = XLSX2HTMLConverter(
     filepath='path/to/example.xlsx',
     locale='de_DE',
     parse_formula=True,
-    optimize_styles=True
+    inline_styles=False
 )
 html = converter.get_html(sheet="sheet name")
 ```
@@ -95,7 +96,7 @@ converter = XLSX2HTMLConverter(
     filepath='path/to/example.xlsx',
     locale='de_DE',
     parse_formula=True,
-    optimize_styles=True
+    inline_styles=False
 )
 result = converter.get_table(sheet="sheet name", extra_attrs={'id': 'table_id'})
 
@@ -107,7 +108,7 @@ print(f"""
     </style>
     </head>
     <body>
-    {result.html}
+        {result.html}
     </body>
 </html>""")
 ```
@@ -120,7 +121,7 @@ converter = XLSX2HTMLConverter(
     filepath='path/to/example.xlsx',
     locale='de_DE',
     parse_formula=True,
-    optimize_styles=True
+    inline_styles=False
 )
 results = converter.get_tables(extra_attrs={'class': 'xlsx_sheet'})
 

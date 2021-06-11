@@ -1,4 +1,7 @@
-def render_attrs(attrs):
+from xlsx2html.utils.style import StyleType
+
+
+def render_attrs(attrs) -> str:
     if not attrs:
         return ""
     return " ".join(
@@ -10,7 +13,7 @@ def render_attrs(attrs):
     )
 
 
-def render_inline_styles(styles):
+def render_inline_styles(styles) -> str:
     if not styles:
         return ""
     return ";".join(
