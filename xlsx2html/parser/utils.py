@@ -3,8 +3,10 @@ from typing import Union
 from openpyxl import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
+SheetNameType = Union[int, str, None]
 
-def get_sheet(wb: Workbook, sheet: Union[str, int, None] = None) -> Worksheet:
+
+def get_sheet(wb: Workbook, sheet: SheetNameType = None) -> Worksheet:
     ws = wb.active
     if sheet is not None:
         try:

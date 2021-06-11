@@ -8,13 +8,14 @@ from xlsx2html.utils import hash_str
 from xlsx2html.utils.render import render_attrs, render_inline_styles
 
 StyleType = Dict[str, Union[str, None]]
+BorderType = Optional[Union[str, StyleType]]
 
 
 class HtmlRenderer:
     def __init__(
         self,
         display_grid: bool = False,
-        default_border_style: Optional[Union[StyleType, str]] = None,
+        default_border_style: BorderType = None,
         table_attrs: Optional[StyleType] = None,
         optimize_styles: bool = False,
     ):
@@ -36,7 +37,12 @@ class HtmlRenderer:
         </body>
         </html>
         """
-        return html % self.render_table(result)
+
+        self.build_style_cache(result.rows)
+        h = [self.render_table(result)]
+        if self.optimize_styles:
+            h.append(self.render_css() or "")
+        return html % "\n".join(h)
 
     def render_table(
         self, result: ParserResult, attrs: Optional[StyleType] = None
@@ -45,9 +51,6 @@ class HtmlRenderer:
         t_attrs: StyleType = dict(border="0", cellspacing="0", cellpadding="0")
         t_attrs.update(self.table_attrs)
         t_attrs.update(attrs or {})
-
-        self._build_style_cache(result.rows)
-
         h = [
             "<table  "
             'style="border-collapse: collapse" '
@@ -69,8 +72,6 @@ class HtmlRenderer:
             trow.append("</tr>")
             h.append("\n".join(trow))
         h.append("</table>")
-        if self.optimize_styles:
-            h.append(self.render_css())
         return "\n".join(h)
 
     def render_header(self, cols: List[Column]) -> str:
@@ -195,7 +196,7 @@ class HtmlRenderer:
             "/>"
         )
 
-    def _build_style_cache(self, rows: List[List[CellInfo]]) -> None:
+    def build_style_cache(self, rows: List[List[CellInfo]]) -> None:
         cell_style_map: Dict[str, str] = {}
         style_hash_map: Dict[str, str] = {}
 
@@ -210,7 +211,10 @@ class HtmlRenderer:
         self._cell_style_map = cell_style_map
         self._style_hash_map = style_hash_map
 
-    def render_css(self) -> str:
+    def render_css(self) -> Union[str, None]:
+        if not self.optimize_styles:
+            return None
+
         css = []
         for c_name, style in self._style_hash_map.items():
             css.append(f"td.{c_name} {{ {style} }}")

@@ -12,7 +12,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 from xlsx2html.compat import OPENPYXL_24
 from xlsx2html.parser.cell import CellInfo, Borders
 from xlsx2html.parser.image import ImageInfo
-from xlsx2html.parser.utils import get_sheet
+from xlsx2html.parser.utils import get_sheet, SheetNameType
 from xlsx2html.utils.cell import letter_to_col_index, col_index_to_letter
 
 
@@ -41,7 +41,7 @@ class ParserResult:
     images: ImageInfoMapType
 
 
-class WBParser:
+class XLSXParser:
     def __init__(self, filepath: Any, locale: str = "en", parse_formula: bool = False):
         self.locale = locale
         self.wb = openpyxl.load_workbook(filepath, data_only=True)
@@ -49,7 +49,10 @@ class WBParser:
         if parse_formula:
             self.fb = openpyxl.load_workbook(filepath, data_only=False)
 
-    def get_sheet(self, sheet: Optional[Union[int, str]] = None) -> ParserResult:
+    def get_sheet_names(self) -> List[str]:
+        return self.wb.sheetnames
+
+    def get_sheet(self, sheet: SheetNameType = None) -> ParserResult:
         ws = get_sheet(self.wb, sheet)
         fs = None
         if self.fb:

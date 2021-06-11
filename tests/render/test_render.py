@@ -1,11 +1,11 @@
 import pytest
 
-from xlsx2html.parser.parser import WBParser
+from xlsx2html.parser.parser import XLSXParser
 from xlsx2html.render.html import HtmlRenderer
 
 
 def test_generic(fixture_file):
-    parser = WBParser(filepath=fixture_file("example.xlsx"))
+    parser = XLSXParser(filepath=fixture_file("example.xlsx"))
     result = parser.get_sheet()
 
     render = HtmlRenderer()
@@ -19,7 +19,7 @@ def test_render_example(fixture_file, temp_file, browser, screenshot_regression)
     browser.driver.set_window_size(1280, 1024)
     out_file = temp_file()
 
-    parser = WBParser(filepath=fixture_file("example.xlsx"))
+    parser = XLSXParser(filepath=fixture_file("example.xlsx"))
     result = parser.get_sheet()
 
     render = HtmlRenderer(display_grid=True)
@@ -39,7 +39,7 @@ def test_optimize_style(fixture_file, temp_file, browser, screenshot_regression)
     browser.driver.set_window_size(1280, 1024)
     out_file = temp_file()
 
-    parser = WBParser(filepath=fixture_file("example.xlsx"))
+    parser = XLSXParser(filepath=fixture_file("example.xlsx"))
     result = parser.get_sheet()
 
     render = HtmlRenderer(
