@@ -1,6 +1,6 @@
 import re
 from decimal import Decimal
-from typing import Union, Any
+from typing import Union, Any, Optional
 
 from babel import Locale
 from babel.numbers import NumberPattern, number_re, parse_grouping, LC_NUMERIC
@@ -170,7 +170,7 @@ class PatternParser:
             return pattern.apply(number, locale)
 
 
-def format_decimal(number, format=None, locale=LC_NUMERIC):
+def format_decimal(number, format: Optional[str] = None, locale: str = LC_NUMERIC):
     """Return the given decimal number formatted for a specific locale.
 
     >>> format_decimal(1.2345, locale='en_US')
@@ -190,12 +190,13 @@ def format_decimal(number, format=None, locale=LC_NUMERIC):
     >>> format_decimal(12345.5, locale='en_US')
     '12,345.5'
 
+
     :param number: the number to format
     :param format:
     :param locale: the `Locale` object or locale identifier
     """
-    locale = Locale.parse(locale)
+    _locale = Locale.parse(locale)
     if not format:
-        format = locale.decimal_formats.get(format)
+        format = _locale.decimal_formats.get(format)
     pattern = PatternParser(format)
     return pattern.apply(number, locale)

@@ -12,12 +12,35 @@ FilePathType = Union[BinaryIO, str]
 
 @dataclass
 class ConverterTableResult:
+    """
+    :param html: html of table
+    :param css: css contents
+        If :paramref:`XLSX2HTMLConverter.optimize_styles` set to `False` then css is empty
+    """
+
     html: str
-    css: Optional[str] = None
+    css: str = ""
 
 
 @dataclass
 class XLSX2HTMLConverter:
+    """
+    :param filepath: xlsx file
+    :type filepath: str | BinaryIO
+    :param locale: ``en`` or ``zh_TW``. defaults to ``en``
+    :type locale: str
+    :param parse_formula: If `True` - enable parse formulas. defaults to `False`
+    :param default_border_style: default border style. Can use short str like ``1px solid black``
+        or dict like ``{'width': '1px', 'style': 'solid', 'color': 'black'}``
+    :param optimize_styles: for split inline styles in cells and render separately
+    :param display_grid:
+
+        Show column letters and row numbers.
+        If :paramref:`XLSX2HTMLConverter.default_border_style` is none - do enabled gray grid
+
+    :type default_cell_border: str|dict, optional
+    """
+
     filepath: FilePathType
     locale: str = "en"
     parse_formula: bool = False
@@ -48,6 +71,12 @@ class XLSX2HTMLConverter:
     def get_table(
         self, sheet: SheetNameType = None, extra_attrs: Optional[StyleType] = None
     ) -> ConverterTableResult:
+        """
+
+        :param sheet: sheet name or idx, defaults to `None` what means get active sheet
+        :param extra_attrs: additional attributes for `<table>` like class or id
+        :return:
+        """
         result = self.parser.get_sheet(sheet)
         self.renderer.build_style_cache(result.rows)
         return ConverterTableResult(
@@ -60,6 +89,12 @@ class XLSX2HTMLConverter:
         sheets: Optional[List[SheetNameType]] = None,
         extra_attrs: Optional[StyleType] = None,
     ) -> List[ConverterTableResult]:
+        """
+
+        :param sheets: list of sheet name or idx. By defaults get all sheets
+        :param extra_attrs: additional attributes for `<table>` like class or id
+        :return:
+        """
         if sheets is None:
             sheets = cast(List[SheetNameType], self.parser.get_sheet_names())
         return [
@@ -67,12 +102,22 @@ class XLSX2HTMLConverter:
         ]
 
     def get_html(self, sheet: SheetNameType = None) -> str:
+        """
+        Get full html with table
+        :param sheet: sheet name or idx, defaults to `None` what means get active sheet
+        :return: full html as string
+        """
         result = self.parser.get_sheet(sheet)
         return self.renderer.render(result)
 
     def get_html_stream(
         self, output: OutputType, sheet: SheetNameType = None
     ) -> TextIO:
+        """
+        :param output: to path or file like, defaults to `None`
+        :param sheet: sheet name or idx, defaults to `None` what means get active sheet
+        :return: File like object
+        """
         html = self.get_html(sheet)
         stream = self._get_stream(output)
         stream.write(html)
@@ -88,6 +133,19 @@ def xlsx2html(
     parse_formula: bool = False,
     default_cell_border: BorderType = None,
 ) -> TextIO:
+    """
+
+    :param filepath: xlsx file
+    :param output: to path or file like, defaults to `None`
+    :param locale: ``en`` or ``zh_TW``. defaults to ``en``
+    :param sheet: sheet name or idx, defaults to `None` what means get active sheet
+    :param parse_formula: If `True` - enable parse formulas. defaults to `False`
+    :param default_cell_border:
+        default border style. Can use short str like ``1px solid black``
+        or dict like ``{'width': '1px', 'style': 'solid', 'color': 'black'}``
+
+    :return: File like object
+    """
     converter = XLSX2HTMLConverter(
         filepath=filepath,
         locale=locale,

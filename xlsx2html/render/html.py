@@ -41,7 +41,8 @@ class HtmlRenderer:
         self.build_style_cache(result.rows)
         h = [self.render_table(result)]
         if self.optimize_styles:
-            h.append(self.render_css() or "")
+            css_tag = f'<style type="text/css">{self.render_css() or ""}</style>'
+            h.append(css_tag)
         return html % "\n".join(h)
 
     def render_table(
@@ -211,13 +212,13 @@ class HtmlRenderer:
         self._cell_style_map = cell_style_map
         self._style_hash_map = style_hash_map
 
-    def render_css(self) -> Union[str, None]:
+    def render_css(self) -> str:
         if not self.optimize_styles:
-            return None
+            return ""
 
         css = []
         for c_name, style in self._style_hash_map.items():
             css.append(f"td.{c_name} {{ {style} }}")
         css_str = "\n".join(css)
         # TODO add compress css
-        return f'<style type="text/css">{css_str}</style>'
+        return css_str

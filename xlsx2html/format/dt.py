@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import datetime as dt
 import re
+from typing import Optional, List
 
 from babel import dates as babel_dates
 from babel.dates import LC_TIME
@@ -17,7 +18,7 @@ MAYBE_MINUTE = ["m", "mm"]
 DATE_PERIOD = ["am/pm", "a/p"]
 
 
-def normalize_datetime_format(fmt, fixed_for_time=False):
+def normalize_datetime_format(fmt: str, fixed_for_time=False):
     has_ap = False
     is_minute = set()
     must_minute = False
@@ -47,7 +48,7 @@ def normalize_datetime_format(fmt, fixed_for_time=False):
 
     parts = []
     pos = 0
-    plain = []
+    plain: List[str] = []
 
     def clean_plain():
         def s(m):
@@ -125,18 +126,29 @@ def normalize_datetime_format(fmt, fixed_for_time=False):
     return "".join(parts)
 
 
-def format_date(date, fmt, locale=LC_TIME):
+def format_date(date: dt.date, fmt: str, locale: str = LC_TIME) -> str:
     fmt = normalize_datetime_format(fmt)
-    datetime = dt.datetime.combine(date, dt.time())
-    return babel_dates.format_datetime(datetime, fmt, locale=locale)
+    _datetime = dt.datetime.combine(date, dt.time())
+    return babel_dates.format_datetime(_datetime, fmt, locale=locale)
 
 
-def format_datetime(datetime, fmt, locale=LC_TIME, tzinfo=None):
+def format_datetime(
+    datetime: dt.datetime,
+    fmt: str,
+    locale: str = LC_TIME,
+    tzinfo: Optional[dt.tzinfo] = None,
+) -> str:
     fmt = normalize_datetime_format(fmt)
     return babel_dates.format_datetime(datetime, fmt, locale=locale, tzinfo=tzinfo)
 
 
-def format_time(time, fmt, locale=LC_TIME, tzinfo=None, date=None):
+def format_time(
+    time: dt.time,
+    fmt: str,
+    locale: str = LC_TIME,
+    tzinfo: Optional[dt.tzinfo] = None,
+    date: Optional[dt.date] = None,
+) -> str:
     # Excel times are treated as Saturday 1900-01-00, which doesn't exist.
     # So use Saturday 1900-01-06 and force day to 0 instead
     fixed_for_time = False
@@ -148,7 +160,7 @@ def format_time(time, fmt, locale=LC_TIME, tzinfo=None, date=None):
     return babel_dates.format_datetime(datetime, fmt, locale=locale, tzinfo=tzinfo)
 
 
-def format_timedelta(timedelta, fmt):
+def format_timedelta(timedelta: dt.timedelta, fmt: str) -> str:
     e_s = timedelta.total_seconds()
     e_m, s = divmod(e_s, 60)
     e_m = int(e_m)

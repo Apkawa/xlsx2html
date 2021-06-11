@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import warnings
-from .core import xlsx2html
+from .core import xlsx2html, XLSX2HTMLConverter
 
-__all__ = ["xls2html", "xlsx2html"]
+__all__ = ["xls2html", "xlsx2html", "XLSX2HTMLConverter"]
 
 __version__ = "0.4.0"
 
