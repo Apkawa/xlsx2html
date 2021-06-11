@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 import datetime as dt
 import re
-from typing import Optional, List
+from typing import Optional, List, Match
 
 from babel import dates as babel_dates
 from babel.dates import LC_TIME
@@ -48,7 +48,7 @@ def normalize_datetime_format(fmt: str, fixed_for_time: bool = False) -> str:
     plain: List[str] = []
 
     def clean_plain() -> str:
-        def s(m: re.Match) -> str:
+        def s(m: Match) -> str:
             g = m.group().replace("'", "''")
             if not re.fullmatch(r"'*", g):
                 g = f"'{g}'"
