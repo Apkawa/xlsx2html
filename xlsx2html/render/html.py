@@ -153,8 +153,13 @@ class HtmlRenderer:
         h_styles.update(self.get_border_style_from_cell(cell))
         h_styles.update(extra_style or {})
 
-        if cell.textAlign:
-            h_styles["text-align"] = cell.textAlign
+        h_styles["text-align"] = cell.alignment.horizontal
+        h_styles["vertical-align"] = cell.alignment.vertical
+        if cell.alignment.indent:
+            h_styles['text-indent'] = f'{cell.alignment.indent*10}pt'
+
+        if cell.alignment.text_rotation:
+            h_styles['transform'] = f'rotate({cell.alignment.text_rotation}deg)'
 
         if cell.fill and cell.fill.pattern == "solid":
             # TODO patternType != 'solid'
@@ -169,7 +174,7 @@ class HtmlRenderer:
             if cell.font.italic:
                 h_styles["font-style"] = "italic"
             if cell.font.underline:
-                h_styles["font-decoration"] = "underline"
+                h_styles["text-decoration"] = "underline"
         return h_styles
 
     def render_image(self, image: ImageInfo) -> str:

@@ -37,6 +37,13 @@ class Font:
     underline: bool = False
     bold: bool = False
 
+@dataclass
+class Alignment:
+    horizontal: Optional[str] = None
+    vertical: Optional[str] = None
+    indent: Optional[float] = None
+    text_rotation: Optional[int] = None
+
 
 @dataclass
 class CellInfo:
@@ -47,6 +54,8 @@ class CellInfo:
     coordinate: str
     value: Any
     formatted_value: str
+
+    alignment: Alignment
     # hyperlink: Optional[Hyperlink] = None
     # format: str = ''
     colspan: Optional[int] = None
@@ -54,9 +63,9 @@ class CellInfo:
 
     height: int = 19
     border: Optional[Union[Borders, Border]] = None
-    textAlign: Optional[str] = None
     fill: Optional[Fill] = None
     font: Optional[Font] = None
+
 
     @classmethod
     def from_cell(
@@ -78,10 +87,19 @@ class CellInfo:
             coordinate=cell.coordinate,
             value=cell.value,
             formatted_value=format_cell(cell, locale=_locale, f_cell=f_cell),
+            alignment=Alignment(
+                horizontal=cell.alignment.horizontal,
+                vertical=cell.alignment.vertical,
+                indent=cell.alignment.indent or None,
+            )
         )
-
-        if cell.alignment.horizontal:
-            cell_info.textAlign = cell.alignment.horizontal
+        # https://docs.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.alignment
+        text_rotation = cell.alignment.textRotation
+        if text_rotation > 90:
+            text_rotation = 90 - text_rotation
+        # FIXME rotation angle 91-265 not work
+        text_rotation *= -1
+        cell_info.alignment.text_rotation = text_rotation or None
 
         if cell.fill:
             cell_info.fill = Fill(
