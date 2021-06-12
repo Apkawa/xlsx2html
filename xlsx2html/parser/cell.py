@@ -36,6 +36,10 @@ class Font:
     italic: bool = False
     underline: bool = False
     bold: bool = False
+    strike: bool = False
+    overline: bool = False
+    outline: bool = False
+    shadow: bool = False
 
 @dataclass
 class Alignment:
@@ -109,9 +113,14 @@ class CellInfo:
             font = Font(size=cell.font.sz)
             if cell.font.color:
                 font.color = normalize_color(cell.font.color)
-            font.bold = bool(cell.font.b)
-            font.italic = bool(cell.font.i)
-            font.underline = bool(cell.font.u)
+            font.bold = cell.font.b
+            font.italic = cell.font.i
+            font.underline = cell.font.u
+            font.strike = cell.font.strike
+            # no supporting
+            # font.overline
+            font.outline = cell.font.outline
+            font.shadow = cell.font.shadow
             cell_info.font = font
         cell_info.border = cls.get_border(cell)
         # TODO merged border

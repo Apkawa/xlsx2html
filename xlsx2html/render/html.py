@@ -13,11 +13,11 @@ from xlsx2html.utils.style import compress_style, StyleType, BorderType
 
 class HtmlRenderer:
     def __init__(
-        self,
-        display_grid: bool = False,
-        default_border_style: Optional[BorderType] = None,
-        table_attrs: Optional[StyleType] = None,
-        inline_styles: bool = False,
+            self,
+            display_grid: bool = False,
+            default_border_style: Optional[BorderType] = None,
+            table_attrs: Optional[StyleType] = None,
+            inline_styles: bool = False,
     ):
         self.default_border_style = default_border_style or {}
         self.display_grid = display_grid
@@ -93,7 +93,7 @@ class HtmlRenderer:
         return f'<col style="width: {col.width}px"/>'
 
     def render_cell(
-        self, cell: CellInfo, images: List[ImageInfo], attrs: Optional[StyleType] = None
+            self, cell: CellInfo, images: List[ImageInfo], attrs: Optional[StyleType] = None
     ) -> str:
 
         formatted_images = "\n".join([self.render_image(img) for img in images])
@@ -147,7 +147,7 @@ class HtmlRenderer:
         return style
 
     def get_styles_from_cell(
-        self, cell: CellInfo, extra_style: Optional[StyleType] = None
+            self, cell: CellInfo, extra_style: Optional[StyleType] = None
     ) -> StyleType:
         h_styles: StyleType = {"border-collapse": "collapse", "height": f"{cell.height}pt"}
         h_styles.update(self.get_border_style_from_cell(cell))
@@ -156,7 +156,7 @@ class HtmlRenderer:
         h_styles["text-align"] = cell.alignment.horizontal
         h_styles["vertical-align"] = cell.alignment.vertical
         if cell.alignment.indent:
-            h_styles['text-indent'] = f'{cell.alignment.indent*10}pt'
+            h_styles['text-indent'] = f'{cell.alignment.indent * 10}pt'
 
         if cell.alignment.text_rotation:
             h_styles['transform'] = f'rotate({cell.alignment.text_rotation}deg)'
@@ -166,6 +166,7 @@ class HtmlRenderer:
             h_styles["background-color"] = cell.fill.color
 
         if cell.font:
+            text_decoration: List[str] = []
             h_styles["font-size"] = "%spx" % cell.font.size
             if cell.font.color:
                 h_styles["color"] = cell.font.color
@@ -174,7 +175,30 @@ class HtmlRenderer:
             if cell.font.italic:
                 h_styles["font-style"] = "italic"
             if cell.font.underline:
-                h_styles["text-decoration"] = "underline"
+                text_decoration.append("underline")
+            if cell.font.strike:
+                text_decoration.append('line-through')
+            if cell.font.overline:
+                text_decoration.append('overline')
+            if cell.font.outline:
+                f_color = cell.font.color or '#000'
+                h_styles['color'] = 'white'
+                h_styles['text-shadow'] = (f'-1px -1px 0 {f_color},'
+                                           f'1px -1px 0 {f_color},'
+                                           f'-1px 1px 0 {f_color},'
+                                           f'1px 1px 0 {f_color}')
+            if cell.font.shadow:
+                t_shadow = h_styles.get('text-shadow', '')
+                if t_shadow:
+                    t_shadow += ', '
+                o = '1px'
+                if cell.font.outline:
+                    o = '2px'
+
+                t_shadow += f'{o} {o} 0 #333'
+                h_styles['text-shadow'] = t_shadow
+
+            h_styles['text-decoration'] = ' '.join(text_decoration)
         return h_styles
 
     def render_image(self, image: ImageInfo) -> str:
