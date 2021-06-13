@@ -74,3 +74,23 @@ def test_render_sheet2(fixture_file, temp_file, browser, screenshot_regression):
 
     browser.visit("file://" + out_file)
     screenshot_regression()
+
+
+@pytest.mark.webtest()
+def test_render_conditional(fixture_file, temp_file, browser, screenshot_regression):
+    browser.driver.set_window_size(1280, 1024)
+    out_file = temp_file()
+
+    parser = XLSXParser(filepath=fixture_file("conditional.xlsx"), parse_formula=True)
+    result = parser.get_sheet()
+
+    render = HtmlRenderer(display_grid=True, inline_styles=False)
+
+    html = render.render(result)
+    assert html
+
+    with open(out_file, "w") as f:
+        f.write(html)
+
+    browser.visit("file://" + out_file)
+    screenshot_regression()

@@ -4,6 +4,7 @@ from typing import Optional, Union, Any
 from openpyxl.cell import Cell
 
 from xlsx2html.compat import OPENPYXL_24
+from xlsx2html.parser.image import ImageInfo
 from xlsx2html.utils.cell import get_cell_id
 from xlsx2html.utils.color import normalize_color
 from xlsx2html.format import format_cell
@@ -73,6 +74,8 @@ class CellInfo:
     border: Optional[Borders] = None
     fill: Optional[Fill] = None
     font: Optional[Font] = None
+
+    images: Optional[ImageInfo] = None
 
     @classmethod
     def from_cell(

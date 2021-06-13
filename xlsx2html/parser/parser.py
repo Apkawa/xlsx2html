@@ -89,6 +89,8 @@ class XLSXParser:
 
         max_col_number = 0
 
+        images = self.get_images(ws)
+
         data_list = []
         for row_i, row in enumerate(ws.iter_rows()):
             data_row: List[CellInfo] = []
@@ -115,6 +117,7 @@ class XLSXParser:
 
                 cell_data = self.get_cell_data(cell, f_cell)
                 cell_data.height = height
+                cell_data.images = images.get((cell_data.column, cell_data.row)) or None
 
                 merged_cell_info = merged_cell_map.get(cell.coordinate)
                 if merged_cell_info:
@@ -137,8 +140,7 @@ class XLSXParser:
                     row.remove(c)
 
         col_list = [col for col in col_list if col.index not in hidden_columns]
-
-        return ParserResult(rows=data_list, cols=col_list, images=self.get_images(ws))
+        return ParserResult(rows=data_list, cols=col_list, images=images)
 
     @staticmethod
     def get_columns(ws: Worksheet, max_col: int) -> List[Column]:

@@ -63,8 +63,7 @@ class HtmlRenderer:
             for i, cell in enumerate(row):
                 if i == 0 and self.display_grid:
                     trow.append(self.render_lineno(cell.row))
-                images = result.images.get((cell.column, cell.row)) or []
-                trow.append(self.render_cell(cell, images))
+                trow.append(self.render_cell(cell))
             trow.append("</tr>")
             h.append("\n".join(trow))
         h.append("</table>")
@@ -92,11 +91,9 @@ class HtmlRenderer:
     def render_column(self, col: Column) -> str:
         return f'<col style="width: {col.width}px"/>'
 
-    def render_cell(
-        self, cell: CellInfo, images: List[ImageInfo], attrs: Optional[StyleType] = None
-    ) -> str:
+    def render_cell(self, cell: CellInfo, attrs: Optional[StyleType] = None) -> str:
 
-        formatted_images = "\n".join([self.render_image(img) for img in images])
+        formatted_images = "\n".join([self.render_image(img) for img in cell.images or []])
 
         c_attrs = {"id": cell.id, "colspan": cell.colspan, "rowspan": cell.rowspan}
 

@@ -3,6 +3,7 @@ from typing import Union, Optional
 
 from openpyxl.cell import Cell
 from openpyxl.formula.tokenizer import Tokenizer, Token
+
 from openpyxl.worksheet.worksheet import Worksheet
 
 from xlsx2html.utils.cell import parse_cell_location
