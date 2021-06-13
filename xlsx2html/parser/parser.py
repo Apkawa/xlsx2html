@@ -121,8 +121,8 @@ class XLSXParser:
                     cell_data.colspan = merged_cell_info.colspan
                     cell_data.rowspan = merged_cell_info.rowspan
 
-                if merged_cell_info:
-                    cell_data.border = self.merge_borders([cell] + merged_cell_info.cells)
+                # if merged_cell_info:
+                #     cell_data.border = self.merge_borders([cell] + merged_cell_info.cells)
 
                 data_row.append(cell_data)
 

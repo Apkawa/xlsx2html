@@ -22,6 +22,9 @@ class Borders:
     right: Optional[Border] = None
     bottom: Optional[Border] = None
 
+    diagonal_up: Optional[Border] = None
+    diagonal_down: Optional[Border] = None
+
 
 @dataclass
 class Fill:
@@ -40,6 +43,7 @@ class Font:
     overline: bool = False
     outline: bool = False
     shadow: bool = False
+
 
 @dataclass
 class Alignment:
@@ -66,10 +70,9 @@ class CellInfo:
     rowspan: Optional[int] = None
 
     height: int = 19
-    border: Optional[Union[Borders, Border]] = None
+    border: Optional[Borders] = None
     fill: Optional[Fill] = None
     font: Optional[Font] = None
-
 
     @classmethod
     def from_cell(
@@ -95,7 +98,7 @@ class CellInfo:
                 horizontal=cell.alignment.horizontal,
                 vertical=cell.alignment.vertical,
                 indent=cell.alignment.indent or None,
-            )
+            ),
         )
         # https://docs.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.alignment
         text_rotation = cell.alignment.textRotation
@@ -130,15 +133,21 @@ class CellInfo:
     def get_border(cell: Cell) -> Union[Borders, None]:
         border_info = Borders()
         is_none = True
-        for b_dir in ["right", "left", "top", "bottom"]:
+        for b_dir in ["right", "left", "top", "bottom", "diagonal"]:
             b_s = getattr(cell.border, b_dir)
-            if not b_s:
+            if not b_s or not b_s.style:
                 continue
             b = Border(style=b_s.style)
             if b_s.color:
                 b.color = normalize_color(b_s.color)
+            if b_dir == "diagonal":
+                if cell.border.diagonalUp:
+                    border_info.diagonal_up = b
+                if cell.border.diagonalDown:
+                    border_info.diagonal_down = b
+            else:
+                setattr(border_info, b_dir, b)
 
-            setattr(border_info, b_dir, b)
             is_none = False
         if is_none:
             return None

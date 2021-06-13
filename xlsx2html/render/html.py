@@ -1,9 +1,9 @@
-from typing import List, Dict, Optional, cast
+from typing import List, Dict, Optional, cast, Tuple
 
 import csscompressor
 
 from xlsx2html.constants.border import DEFAULT_BORDER_STYLE, BORDER_STYLES
-from xlsx2html.parser.cell import CellInfo, Border
+from xlsx2html.parser.cell import CellInfo, Border, Borders
 from xlsx2html.parser.image import ImageInfo
 from xlsx2html.parser.parser import Column, ParserResult
 from xlsx2html.utils import hash_str
@@ -13,11 +13,11 @@ from xlsx2html.utils.style import compress_style, StyleType, BorderType
 
 class HtmlRenderer:
     def __init__(
-            self,
-            display_grid: bool = False,
-            default_border_style: Optional[BorderType] = None,
-            table_attrs: Optional[StyleType] = None,
-            inline_styles: bool = False,
+        self,
+        display_grid: bool = False,
+        default_border_style: Optional[BorderType] = None,
+        table_attrs: Optional[StyleType] = None,
+        inline_styles: bool = False,
     ):
         self.default_border_style = default_border_style or {}
         self.display_grid = display_grid
@@ -93,7 +93,7 @@ class HtmlRenderer:
         return f'<col style="width: {col.width}px"/>'
 
     def render_cell(
-            self, cell: CellInfo, images: List[ImageInfo], attrs: Optional[StyleType] = None
+        self, cell: CellInfo, images: List[ImageInfo], attrs: Optional[StyleType] = None
     ) -> str:
 
         formatted_images = "\n".join([self.render_image(img) for img in images])
@@ -103,6 +103,14 @@ class HtmlRenderer:
         class_name = self._cell_style_map[cell.coordinate]
         if not self.inline_styles:
             c_attrs["class"] = class_name
+            # Diagonal border
+            # TODO implement
+            # extra_classes = self.get_diagonal_border_style(cell.border)
+            # if extra_classes:
+            #     for k, v in extra_classes.items():
+            #         class_name, style_str = self._hash_style(v)
+            #         self._style_hash_map[class_name + k] = style_str
+            #         c_attrs["class"] += " " + class_name
         else:
             c_attrs["style"] = self._style_hash_map[class_name]
 
@@ -146,20 +154,46 @@ class HtmlRenderer:
                 style.update(_get_border_style(b_s, f"border-{b_dir}"))
         return style
 
+    def get_diagonal_border_style(self, border: Borders) -> Dict:
+        class_styles = {}
+        base_style = {
+            "content": "' '",
+            "width": "100%",
+            "height": "100%",
+            "display": "block",
+            "position": "absolute",
+            "background-color": "red",
+            "top": "0",
+            "left": "0",
+        }
+        if border.diagonal_up:
+            class_styles["::after"] = {
+                **base_style,
+                "content": "'up'",
+                "transform": "rotate(-45deg)",
+            }
+        if border.diagonal_down:
+            class_styles["::before"] = {
+                **base_style,
+                "content": "'down'",
+                "border-color": "white transparent",
+            }
+        return class_styles
+
     def get_styles_from_cell(
-            self, cell: CellInfo, extra_style: Optional[StyleType] = None
+        self, cell: CellInfo, extra_style: Optional[StyleType] = None
     ) -> StyleType:
-        h_styles: StyleType = {"border-collapse": "collapse", "height": f"{cell.height}pt"}
+        h_styles: StyleType = {"height": f"{cell.height}pt"}
         h_styles.update(self.get_border_style_from_cell(cell))
         h_styles.update(extra_style or {})
 
         h_styles["text-align"] = cell.alignment.horizontal
         h_styles["vertical-align"] = cell.alignment.vertical
         if cell.alignment.indent:
-            h_styles['text-indent'] = f'{cell.alignment.indent * 10}pt'
+            h_styles["text-indent"] = f"{cell.alignment.indent * 10}pt"
 
         if cell.alignment.text_rotation:
-            h_styles['transform'] = f'rotate({cell.alignment.text_rotation}deg)'
+            h_styles["transform"] = f"rotate({cell.alignment.text_rotation}deg)"
 
         if cell.fill and cell.fill.pattern == "solid":
             # TODO patternType != 'solid'
@@ -177,28 +211,30 @@ class HtmlRenderer:
             if cell.font.underline:
                 text_decoration.append("underline")
             if cell.font.strike:
-                text_decoration.append('line-through')
+                text_decoration.append("line-through")
             if cell.font.overline:
-                text_decoration.append('overline')
+                text_decoration.append("overline")
             if cell.font.outline:
-                f_color = cell.font.color or '#000'
-                h_styles['color'] = 'white'
-                h_styles['text-shadow'] = (f'-1px -1px 0 {f_color},'
-                                           f'1px -1px 0 {f_color},'
-                                           f'-1px 1px 0 {f_color},'
-                                           f'1px 1px 0 {f_color}')
+                f_color = cell.font.color or "#000"
+                h_styles["color"] = "white"
+                h_styles["text-shadow"] = (
+                    f"-1px -1px 0 {f_color},"
+                    f"1px -1px 0 {f_color},"
+                    f"-1px 1px 0 {f_color},"
+                    f"1px 1px 0 {f_color}"
+                )
             if cell.font.shadow:
-                t_shadow = h_styles.get('text-shadow', '')
+                t_shadow = h_styles.get("text-shadow") or ""
                 if t_shadow:
-                    t_shadow += ', '
-                o = '1px'
+                    t_shadow += ", "
+                o = "1px"
                 if cell.font.outline:
-                    o = '2px'
+                    o = "2px"
 
-                t_shadow += f'{o} {o} 0 #333'
-                h_styles['text-shadow'] = t_shadow
+                t_shadow += f"{o} {o} 0 #333"
+                h_styles["text-shadow"] = t_shadow
 
-            h_styles['text-decoration'] = ' '.join(text_decoration)
+            h_styles["text-decoration"] = " ".join(text_decoration)
         return h_styles
 
     def render_image(self, image: ImageInfo) -> str:
@@ -216,6 +252,11 @@ class HtmlRenderer:
             "/>"
         )
 
+    def _hash_style(self, style: StyleType, prefix: str = "td-") -> Tuple[str, str]:
+        style_str = render_inline_styles(style)
+        class_name = prefix + hash_str(style_str)
+        return class_name, style_str
+
     def build_style_cache(self, rows: List[List[CellInfo]]) -> None:
         cell_style_map: Dict[str, str] = {}
         style_hash_map: Dict[str, str] = {}
@@ -224,8 +265,7 @@ class HtmlRenderer:
             for cell in row:
                 style = self.get_styles_from_cell(cell)
                 style = compress_style(style)
-                style_str = render_inline_styles(style)
-                class_name = "td-" + hash_str(style_str)
+                class_name, style_str = self._hash_style(style)
                 style_hash_map[class_name] = style_str
                 cell_style_map[cell.coordinate] = class_name
 
