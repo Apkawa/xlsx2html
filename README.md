@@ -140,3 +140,14 @@ print(f"""
     </body>
 </html>""")
 ```
+
+## Limitations
+
+* No support:
+    * [ ] overline (no working with openpyxl and LibreOffice with xlsx)
+    * [ ] conditional styles
+    * [ ] charts
+    * [ ] freezing panes
+    * [ ] diagonal borders
+    * [ ] pattern cell fill 
+* [ ] Issue with `border-collapse: collapse` and merged cells
