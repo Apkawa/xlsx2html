@@ -149,6 +149,42 @@ def images_to_data(ws: Worksheet):
         images_data[(_id["col"], _id["row"])].append(_id)
     return images_data
 
+def get_dimensions(ws:Worksheet)->tuple:
+    abc = [chr(i) for i in range(ord('a'),ord('z')+1)]
+    column = [] 
+    column_aux = []
+    row = []
+    i:str
+    if ws._print_area is not None:
+        for area in ws._print_area:
+            j = area.split(':')
+            w=[]
+            for a in j:
+                for x in a.split('$'):
+                    w.append(x)
+            for i in w:
+                if i.isdigit():
+                    row.append(i)
+                elif i.isalpha():
+                    column.append(i)
+
+        for r in column:
+            f = 0
+            for a in abc:
+                f += 1
+                if r == a.upper():
+                    column_aux.append(f)
+
+        row_min = int(row[0])
+        col_min = column_aux[0]
+        row_max = int(row[1]) 
+        col_max = column_aux[1]
+    else:
+        row_min = None
+        col_min = None
+        row_max = None 
+        col_max = None
+    return (row_min,row_max,col_min,col_max)
 
 def worksheet_to_data(ws, locale=None, fs=None, default_cell_border="none"):
     merged_cell_map = {}
@@ -166,6 +202,7 @@ def worksheet_to_data(ws, locale=None, fs=None, default_cell_border="none"):
             ]
         )
 
+    row_min, row_max, col_min, col_max = get_dimensions(ws=ws)
     for cell_range in merged_cell_ranges:
         cell_range_list = list(ws[cell_range])
         m_cell = cell_range_list[0][0]
@@ -185,7 +222,7 @@ def worksheet_to_data(ws, locale=None, fs=None, default_cell_border="none"):
     max_col_number = 0
 
     data_list = []
-    for row_i, row in enumerate(ws.iter_rows()):
+    for row_i, row in enumerate(ws.iter_rows(min_row=row_min,max_row=row_max,min_col=col_min, max_col=col_max)):
         data_row = []
         data_list.append(data_row)
         for col_i, cell in enumerate(row):
