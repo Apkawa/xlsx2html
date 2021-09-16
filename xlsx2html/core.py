@@ -135,6 +135,7 @@ def image_to_data(image: Image) -> dict:
         "style": {
             "margin-left": f"{offsetX}px",
             "margin-top": f"{offsetY}px",
+            "position": "absolute"
         },
     }
     return data
