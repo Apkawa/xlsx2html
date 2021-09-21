@@ -129,13 +129,13 @@ def image_to_data(image: Image) -> dict:
         "col": _from.col + 1,
         "row": _from.row + 1,
         "offset": {"x": offsetX, "y": offsetY},
-        "width": units.EMU_to_pixels(transform.ext.width),
-        "height": units.EMU_to_pixels(transform.ext.height),
+        "width": units.EMU_to_pixels(transform.ext.cx),
+        "height": units.EMU_to_pixels(transform.ext.cy),
         "src": bytes_to_datauri(image.ref, image.path),
         "style": {
             "margin-left": f"{offsetX}px",
             "margin-top": f"{offsetY}px",
-            "position": "absolute"
+            #"position": "absolute"
         },
     }
     return data
