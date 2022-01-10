@@ -8,7 +8,6 @@ from openpyxl.cell import Cell
 from openpyxl.drawing.image import Image
 from openpyxl.utils import rows_from_range, column_index_from_string
 from openpyxl.worksheet.worksheet import Worksheet
-
 from xlsx2html.compat import OPENPYXL_24
 from xlsx2html.parser.cell import CellInfo, Borders
 from xlsx2html.parser.image import ImageInfo
@@ -64,6 +63,7 @@ class XLSXParser:
             excluded_cells = set(ws.merged_cells)
         else:
             merged_cell_ranges = [cell_range.coord for cell_range in ws.merged_cells.ranges]
+            # TODO Optimize for large merge
             excluded_cells = set(
                 [
                     cell
@@ -72,7 +72,7 @@ class XLSXParser:
                     for cell in rows
                 ]
             )
-
+        # TODO optimize for large merge
         for cell_range in merged_cell_ranges:
             cell_range_list = list(ws[cell_range])
             m_cell = cell_range_list[0][0]

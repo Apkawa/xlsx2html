@@ -2,6 +2,7 @@
 import warnings
 from typing import TextIO
 
+from . import monkey_patch  # noqa
 from .core import xlsx2html, XLSX2HTMLConverter
 
 __all__ = ["xls2html", "xlsx2html", "XLSX2HTMLConverter"]
