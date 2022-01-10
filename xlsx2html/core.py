@@ -1,6 +1,9 @@
 import io
-from dataclasses import dataclass, InitVar
+from dataclasses import dataclass, InitVar, field
 from typing import Optional, Union, TextIO, List, BinaryIO, cast, Iterable
+
+import openpyxl
+from openpyxl import Workbook
 
 from xlsx2html.parser.parser import XLSXParser
 from xlsx2html.parser.utils import SheetNameType
@@ -8,7 +11,7 @@ from xlsx2html.render.html import HtmlRenderer
 from xlsx2html.utils.style import StyleType, BorderType
 
 OutputType = Optional[Union[TextIO, str]]
-FilePathType = Union[BinaryIO, str]
+FilePathType = Union[BinaryIO, str, Workbook]
 
 
 @dataclass
@@ -27,10 +30,12 @@ class ConverterTableResult:
 class XLSX2HTMLConverter:
     """
     :param filepath: xlsx file
-    :type filepath: str | BinaryIO
+    :type filepath: str | BinaryIO | openpyxl.Workbook
     :param locale: ``en`` or ``zh_TW``. defaults to ``en``
     :type locale: str
     :param parse_formula: If `True` - enable parse formulas. defaults to `False`
+    :param formula_fb: If `parse_formula` set to True and type `filepath` as `openpyxl.Workbook`
+        then pass ``formula_wb=openpyxl.load_workbook(filepath, data_only=False)``
     :param default_border_style: default border style. Can use short str like ``1px solid black``
         or dict like ``{'width': '1px', 'style': 'solid', 'color': 'black'}``
     :param inline_styles: store styles inline
@@ -48,6 +53,8 @@ class XLSX2HTMLConverter:
     inline_styles: bool = False
     display_grid: bool = False
     default_border_style: Optional[BorderType] = None
+    wb: Workbook = field(init=False)
+    formula_wb: Optional[Workbook] = None
 
     parser: InitVar[XLSXParser] = None
     renderer: InitVar[HtmlRenderer] = None
@@ -55,8 +62,23 @@ class XLSX2HTMLConverter:
     def __post_init__(
         self, parser: Optional[XLSXParser], renderer: Optional[HtmlRenderer]
     ) -> None:
+
+        if self.parse_formula and isinstance(self.filepath, Workbook) and not self.formula_wb:
+            raise ValueError(
+                "for parse_formula must be set "
+                "`formula_wb=openpyxl.load_workbook(filepath, data_only=False)`"
+            )
+
+        if isinstance(self.filepath, Workbook):
+            self.wb = self.filepath
+        else:
+            self.wb = openpyxl.load_workbook(self.filepath, data_only=True)
+
+        if self.parse_formula and not self.formula_wb:
+            self.formula_wb = openpyxl.load_workbook(self.filepath, data_only=False)
+
         self.parser: XLSXParser = parser or XLSXParser(
-            filepath=self.filepath, parse_formula=self.parse_formula, locale=self.locale
+            wb=self.wb, parse_formula=self.parse_formula, locale=self.locale, fb=self.formula_wb
         )
         self.renderer: HtmlRenderer = renderer or HtmlRenderer(
             default_border_style=self.default_border_style,

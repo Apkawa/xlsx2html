@@ -1,11 +1,13 @@
+import openpyxl
 import pytest
+from openpyxl import load_workbook
 
 from xlsx2html.parser.parser import XLSXParser
 from xlsx2html.render.html import HtmlRenderer
 
 
 def test_generic(fixture_file):
-    parser = XLSXParser(filepath=fixture_file("example.xlsx"))
+    parser = XLSXParser(wb=load_workbook(fixture_file("example.xlsx")))
     result = parser.get_sheet()
 
     render = HtmlRenderer()
@@ -19,7 +21,7 @@ def test_render_example(fixture_file, temp_file, browser, screenshot_regression)
     browser.driver.set_window_size(1280, 1024)
     out_file = temp_file()
 
-    parser = XLSXParser(filepath=fixture_file("example.xlsx"))
+    parser = XLSXParser(wb=load_workbook(fixture_file("example.xlsx")))
     result = parser.get_sheet()
 
     render = HtmlRenderer(display_grid=True, inline_styles=True)
@@ -39,7 +41,7 @@ def test_optimize_style(fixture_file, temp_file, browser, screenshot_regression)
     browser.driver.set_window_size(1280, 1024)
     out_file = temp_file()
 
-    parser = XLSXParser(filepath=fixture_file("example.xlsx"))
+    parser = XLSXParser(wb=load_workbook(fixture_file("example.xlsx")))
     result = parser.get_sheet()
 
     render = HtmlRenderer(
@@ -61,7 +63,7 @@ def test_render_sheet2(fixture_file, temp_file, browser, screenshot_regression):
     browser.driver.set_window_size(1280, 1024)
     out_file = temp_file()
 
-    parser = XLSXParser(filepath=fixture_file("example.xlsx"))
+    parser = XLSXParser(wb=load_workbook(fixture_file("example.xlsx")))
     result = parser.get_sheet(1)
 
     render = HtmlRenderer(display_grid=True, inline_styles=False)

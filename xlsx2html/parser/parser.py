@@ -1,9 +1,9 @@
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Any, Optional, List, Dict, Tuple, Union
+from typing import Optional, List, Dict, Tuple, Union
 
-import openpyxl
 import six
+from openpyxl import Workbook
 from openpyxl.cell import Cell
 from openpyxl.drawing.image import Image
 from openpyxl.utils import rows_from_range, column_index_from_string
@@ -42,12 +42,23 @@ class ParserResult:
 
 
 class XLSXParser:
-    def __init__(self, filepath: Any, locale: str = "en", parse_formula: bool = False):
+    def __init__(
+        self,
+        wb: Workbook,
+        locale: str = "en",
+        parse_formula: bool = False,
+        fb: Optional[Workbook] = None,
+    ):
         self.locale = locale
-        self.wb = openpyxl.load_workbook(filepath, data_only=True)
+        self.wb = wb
         self.fb = None
+        if parse_formula and not fb:
+            raise ValueError(
+                "for parse_formula=True must be set "
+                "`fb=openpyxl.load_workbook(filepath, data_only=False)`"
+            )
         if parse_formula:
-            self.fb = openpyxl.load_workbook(filepath, data_only=False)
+            self.fb = fb
 
     def get_sheet_names(self) -> List[str]:
         return self.wb.sheetnames
