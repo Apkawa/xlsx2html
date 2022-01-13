@@ -35,7 +35,7 @@ jobs:
       TOXENV: ${{ matrix.toxenv }}
     steps:
       # chrome headless
-      - uses: browser-actions/setup-chrome@957103
+      - uses: browser-actions/setup-chrome@latest
         with:
           chrome-version: 957103
       - uses: actions/checkout@v2
