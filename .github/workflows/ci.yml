@@ -47,6 +47,8 @@ jobs:
           pip install tox python-coveralls codecov
       - name: Run tests
         run: tox
+        with:
+          chrome-version: 957103
       - uses: codecov/codecov-action@v1
         with:
           env_vars: OS,PYTHON,TOXENV
