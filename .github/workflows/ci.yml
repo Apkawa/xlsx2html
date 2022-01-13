@@ -35,7 +35,7 @@ jobs:
       TOXENV: ${{ matrix.toxenv }}
     steps:
       # chrome headless
-      - uses: browser-actions/setup-chrome@latest
+      - uses: browser-actions/setup-chrome@957103
       - uses: actions/checkout@v2
       - name: Set up python ${{ matrix.python-version}}
         uses: actions/setup-python@v2
