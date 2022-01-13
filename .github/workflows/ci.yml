@@ -36,6 +36,8 @@ jobs:
     steps:
       # chrome headless
       - uses: browser-actions/setup-chrome@957103
+        with:
+          chrome-version: 957103
       - uses: actions/checkout@v2
       - name: Set up python ${{ matrix.python-version}}
         uses: actions/setup-python@v2
@@ -47,8 +49,6 @@ jobs:
           pip install tox python-coveralls codecov
       - name: Run tests
         run: tox
-        with:
-          chrome-version: 957103
       - uses: codecov/codecov-action@v1
         with:
           env_vars: OS,PYTHON,TOXENV
