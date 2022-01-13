@@ -133,7 +133,7 @@ class XLSX2HTMLConverter:
         result = self.parser.get_sheet(sheet)
         return self.renderer.render(result)
 
-    def get_html_stream(self, output: OutputType, sheet: SheetNameType = None) -> TextIO:
+    def get_html_stream(self, output: OutputType = None, sheet: SheetNameType = None) -> TextIO:
         """
         :param output: to path or file like, defaults to `None`
         :param sheet: sheet name or idx, defaults to `None` what means get active sheet
