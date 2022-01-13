@@ -127,6 +127,7 @@ class XLSX2HTMLConverter:
     def get_html(self, sheet: SheetNameType = None) -> str:
         """
         Get full html with table
+
         :param sheet: sheet name or idx, defaults to `None` what means get active sheet
         :return: full html as string
         """
@@ -135,6 +136,7 @@ class XLSX2HTMLConverter:
 
     def get_html_stream(self, output: OutputType = None, sheet: SheetNameType = None) -> TextIO:
         """
+
         :param output: to path or file like, defaults to `None`
         :param sheet: sheet name or idx, defaults to `None` what means get active sheet
         :return: File like object

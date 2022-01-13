@@ -75,7 +75,7 @@ python -m xlsx2html path/to/example.xlsx path/to/output.html
 
 ### Advanced usage
 
-Use converter class:
+#### Use converter class
 
 ```python
 from xlsx2html import XLSX2HTMLConverter
@@ -88,7 +88,7 @@ converter = XLSX2HTMLConverter(
 html = converter.get_html(sheet="sheet name")
 ```
 
-Export sheet to only table:
+#### Export sheet to only table
 
 ```python
 from xlsx2html import XLSX2HTMLConverter
@@ -113,7 +113,7 @@ print(f"""
 </html>""")
 ```
 
-Export all sheets:
+#### Export all sheets
 
 ```python
 from xlsx2html import XLSX2HTMLConverter
@@ -141,6 +141,29 @@ print(f"""
 </html>""")
 ```
 
+#### use openpyxl.Workbook instance
+
+```python
+import openpyxl
+from xlsx2html import xlsx2html
+
+XLSX_FILE = 'path/to/example.xlsx'
+
+# Simple, but no work with parse_formula=True
+out_file = xlsx2html(load_workbook(XLSX_FILE, data_only=True))
+
+# Use converter
+
+converter = XLSX2HTMLConverter(
+    filepath=load_workbook(XLSX_FILE, data_only=True),
+    parse_formula=True,
+    formula_wb=load_workbook(XLSX_FILE, data_only=False),
+)
+out_file = converter.get_html_stream()
+
+```
+
+
 ## Limitations
 
 * No support:
@@ -149,5 +172,5 @@ print(f"""
     * [ ] charts
     * [ ] freezing panes
     * [ ] diagonal borders
-    * [ ] pattern cell fill 
-* [ ] Issue with `border-collapse: collapse` and merged cells
+    * [ ] pattern cell fill
+* [ ] Have issue with `border-collapse: collapse` and merged cells
