@@ -16,6 +16,11 @@ def image_diff_reference_dir():
     return os.path.join(os.path.dirname(__file__), "screenshots")
 
 
+@pytest.fixture(scope="session")
+def image_diff_threshold():
+    return 0.05
+
+
 @pytest.fixture(scope="function")
 def temp_file():
     temp_files = []
