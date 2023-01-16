@@ -4,7 +4,7 @@ from .core import xlsx2html
 
 __all__ = ["xls2html", "xlsx2html"]
 
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 
 
 def xls2html(*args, **kwargs):
