@@ -30,7 +30,9 @@ if sys.argv[1] == "bumpversion":
     os.system("bumpversion --config-file setup.cfg %s" % part)
     sys.exit()
 
-__doc__ = """A generic api for oauth2"""
+__doc__ = (
+    """A simple export from xlsx format to html tables with keep cell formatting"""
+)
 
 project_name = "xlsx2html"
 app_name = "xlsx2html"
