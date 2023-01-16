@@ -27,7 +27,7 @@ if sys.argv[1] == "bumpversion":
     except IndexError:
         part = "patch"
 
-    os.system("bumpversion --config-file setup.cfg %s" % part)
+    os.system("bump2version --config-file setup.cfg %s" % part)
     sys.exit()
 
 __doc__ = (
