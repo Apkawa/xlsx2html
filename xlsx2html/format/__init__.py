@@ -13,7 +13,7 @@ from .number import format_decimal
 
 def format_cell(cell, locale=None, f_cell=None):
     value = cell.value
-    formatted_value = value or "&nbsp;"
+    formatted_value = value if value == 0 else value or "&nbsp;"
     cell_format = cell.number_format
     if not cell_format:
         return format_hyperlink(formatted_value, cell.hyperlink)
