@@ -65,7 +65,7 @@ def format_hyperlink(value, cell, f_cell=None):
         href = hyperlink.target
 
     # Maybe link to cell
-    if href.startswith("#"):
+    if href and href.startswith("#"):
         location_info = parse_cell_location(href)
         if location_info:
             href = "#{}.{}".format(
