@@ -97,6 +97,8 @@ def get_styles_from_cell(cell, merged_cell_map=None, default_cell_border="none")
 
     if cell.alignment.horizontal:
         h_styles["text-align"] = cell.alignment.horizontal
+    if cell.alignment.vertical:
+        h_styles['vertical-align'] = cell.alignment.vertical
 
     with contextlib.suppress(AttributeError):
         if cell.fill.patternType == "solid":
