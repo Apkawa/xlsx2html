@@ -353,21 +353,35 @@ def xlsx2html(
 ):
     wb = openpyxl.load_workbook(filepath, data_only=True)
     ws = get_sheet(wb, sheet)
+    # get number of sheets
+    sheets = len(wb.worksheets)
+    if sheets>0:
+        for i in range(sheets):
+            # combines multiple excel sheets into 1 file
+            ws = core.get_sheet(wb, i)
+            data = core.worksheet_to_data(
+                ws, locale="en", fs=None, default_cell_border="none"
+            )
+            html_data = core.render_data_to_html(data, (lambda dumb1, dumb2: True),
+                                                 (lambda dumb1, dumb2: True)).replace("</table>", r"</table><br></br>")
+            with open(output, "a") as f:
+                f.write(html_data)
+    else:
 
-    fs = None
-    if parse_formula:
-        fb = openpyxl.load_workbook(filepath, data_only=False)
-        fs = get_sheet(fb, sheet)
+        fs = None
+        if parse_formula:
+            fb = openpyxl.load_workbook(filepath, data_only=False)
+            fs = get_sheet(fb, sheet)
 
-    data = worksheet_to_data(
-        ws, locale=locale, fs=fs, default_cell_border=default_cell_border
-    )
-    html = render_data_to_html(data, append_headers, append_lineno)
+        data = worksheet_to_data(
+            ws, locale=locale, fs=fs, default_cell_border=default_cell_border
+        )
+        html = render_data_to_html(data, append_headers, append_lineno)
 
-    if not output:
-        output = io.StringIO()
-    if isinstance(output, str):
-        output = open(output, "w")
-    output.write(html)
-    output.flush()
+        if not output:
+            output = io.StringIO()
+        if isinstance(output, str):
+            output = open(output, "w")
+        output.write(html)
+        output.flush()
     return output
