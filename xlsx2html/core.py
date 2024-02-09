@@ -98,7 +98,7 @@ def get_styles_from_cell(cell, merged_cell_map=None, default_cell_border="none")
     if cell.alignment.horizontal:
         h_styles["text-align"] = cell.alignment.horizontal
     if cell.alignment.vertical:
-        h_styles['vertical-align'] = cell.alignment.vertical
+        h_styles["vertical-align"] = cell.alignment.vertical
 
     with contextlib.suppress(AttributeError):
         if cell.fill.patternType == "solid":
@@ -321,8 +321,7 @@ def render_table(data, append_headers, append_lineno):
     return "\n".join(html)
 
 
-def render_data_to_html(data, append_headers, append_lineno):
-    html = """
+HTML_TEMPLATE = """
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -334,7 +333,10 @@ def render_data_to_html(data, append_headers, append_lineno):
     </body>
     </html>
     """
-    return html % render_table(data, append_headers, append_lineno)
+
+
+def render_data_to_html(data, append_headers, append_lineno):
+    return HTML_TEMPLATE % render_table(data, append_headers, append_lineno)
 
 
 def get_sheet(wb, sheet):
@@ -358,22 +360,18 @@ def xlsx2html(
     default_cell_border="none",
 ):
     wb = openpyxl.load_workbook(filepath, data_only=True)
-    ws = get_sheet(wb, sheet)
-    # get number of sheets
-    sheets = len(wb.worksheets)
-    if sheets>0:
-        for i in range(sheets):
-            # combines multiple excel sheets into 1 file
-            ws = core.get_sheet(wb, i)
-            data = core.worksheet_to_data(
-                ws, locale="en", fs=None, default_cell_border="none"
-            )
-            html_data = core.render_data_to_html(data, (lambda dumb1, dumb2: True),
-                                                 (lambda dumb1, dumb2: True)).replace("</table>", r"</table><br></br>")
-            with open(output, "a") as f:
-                f.write(html_data)
-    else:
+    sheet_list = [sheet]
+    if isinstance(sheet, (list, tuple)):
+        # TODO any iterable
+        sheet_list = sheet
 
+    if not output:
+        output = io.StringIO()
+    if isinstance(output, str):
+        output = open(output, "w")
+    html_tables = []
+    for sheet in sheet_list:
+        ws = get_sheet(wb, sheet)
         fs = None
         if parse_formula:
             fb = openpyxl.load_workbook(filepath, data_only=False)
@@ -382,12 +380,8 @@ def xlsx2html(
         data = worksheet_to_data(
             ws, locale=locale, fs=fs, default_cell_border=default_cell_border
         )
-        html = render_data_to_html(data, append_headers, append_lineno)
+        html_tables.append(render_table(data, append_headers, append_lineno))
 
-        if not output:
-            output = io.StringIO()
-        if isinstance(output, str):
-            output = open(output, "w")
-        output.write(html)
-        output.flush()
+    output.write(HTML_TEMPLATE % "\n".join(html_tables))
+    output.flush()
     return output

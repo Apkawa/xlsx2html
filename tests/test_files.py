@@ -2,6 +2,7 @@
 import io
 import os
 
+import openpyxl
 import pytest
 
 from xlsx2html.core import xlsx2html
@@ -65,3 +66,16 @@ def test_screenshot_diff(temp_file, browser, screenshot_regression):
     xlsx2html(XLSX_FILE, out_file, locale="en")
     browser.visit("file://" + out_file)
     screenshot_regression()
+
+
+def test_multiple_sheets(temp_file):
+    out_file = temp_file()
+    xlsx2html(XLSX_FILE, out_file, locale="en", sheet=[0, 2])  # Can use index
+    result_html = open(out_file).read()
+    assert result_html.count("</table>") == 2
+
+    # By names
+    wb = openpyxl.load_workbook(XLSX_FILE)
+    xlsx2html(XLSX_FILE, out_file, locale="en", sheet=wb.sheetnames)  # Can use index
+    result_html = open(out_file).read()
+    assert result_html.count("</table>") == 3
