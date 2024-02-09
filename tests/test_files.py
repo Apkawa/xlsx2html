@@ -49,6 +49,15 @@ def test_hyperlink(temp_file):
     assert result_html
 
 
+def test_issue_30_cell_range_value(temp_file):
+    out_file = temp_file()
+    xlsx2html(
+        get_fixture("cell_range_value.xlsx"), out_file, locale="en", parse_formula=True
+    )
+    result_html = open(out_file).read()
+    assert result_html
+
+
 @pytest.mark.webtest()
 def test_screenshot_diff(temp_file, browser, screenshot_regression):
     browser.driver.set_window_size(1280, 1024)

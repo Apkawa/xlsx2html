@@ -178,7 +178,6 @@ def worksheet_to_data(ws, locale=None, fs=None, default_cell_border="none"):
         else:
             cell_range_list = list(ws[cell_range])
 
-        cell_range_list = list(ws[cell_range])
         m_cell = cell_range_list[0][0]
 
         colspan = len(cell_range_list[0])
