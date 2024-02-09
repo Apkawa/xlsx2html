@@ -37,7 +37,7 @@ jobs:
       # chrome headless
       - uses: browser-actions/setup-chrome@latest
         with:
-          chrome-version: 111
+          chrome-version: 1111197
 
       - uses: actions/checkout@v2
       - name: Set up python ${{ matrix.python-version}}
