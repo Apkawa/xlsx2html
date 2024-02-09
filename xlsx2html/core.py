@@ -171,6 +171,11 @@ def worksheet_to_data(ws, locale=None, fs=None, default_cell_border="none"):
         )
 
     for cell_range in merged_cell_ranges:
+        if ":" not in str(cell_range):
+            cell_range_list = list(ws[f"{cell_range}:{cell_range}"])
+        else:
+            cell_range_list = list(ws[cell_range])
+
         cell_range_list = list(ws[cell_range])
         m_cell = cell_range_list[0][0]
 
