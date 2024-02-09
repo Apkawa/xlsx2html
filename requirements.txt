@@ -11,7 +11,7 @@ pytest==6.2.4
 pytest-flake8==1.0.7
 pytest-cov==2.12.1
 pytest-splinter==3.3.2
-splinter>=0.17,<0.18
+splinter>=0.21,<0.22
 #chromedriver-binary-auto
 diffimg==0.2.3
 #mypy>=0.901

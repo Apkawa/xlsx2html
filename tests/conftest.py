@@ -43,13 +43,26 @@ def splinter_webdriver(request):
 
 
 @pytest.fixture(scope="session")
+def splinter_driver_kwargs(request, splinter_webdriver):
+    kw = {}
+    # TODO check for another browsers https://github.com/cobrateam/splinter/pull/1132/
+    if splinter_webdriver == "chrome":
+        executable = request.config.option.splinter_webdriver_executable
+        if not executable:
+            from chromedriver_binary import chromedriver_filename
+            executable = chromedriver_filename
+        from selenium.webdriver.chrome.service import Service
+        kw['service'] = Service(executable_path=executable)
+    return kw
+
+
+@pytest.fixture(scope="session")
 def splinter_webdriver_executable(request, splinter_webdriver):
     """Webdriver executable directory."""
     executable = request.config.option.splinter_webdriver_executable
-    if not executable and splinter_webdriver == "chrome":
-        from chromedriver_binary import chromedriver_filename
-
-        executable = chromedriver_filename
+    if splinter_webdriver == "chrome":
+        # Workaround for never chromedriver
+        return None
     return os.path.abspath(executable) if executable else None
 
 
