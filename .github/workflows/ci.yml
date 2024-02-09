@@ -33,12 +33,10 @@ jobs:
     continue-on-error: ${{ matrix.experimental }}
     env:
       TOXENV: ${{ matrix.toxenv }}
-      CHROMEDRIVER_PACKAGE: "chromedriver-binary==v111.0.5563.64.0"
+      CHROMEDRIVER_PACKAGE: "chromedriver-binary-auto"
     steps:
       # chrome headless
       - uses: browser-actions/setup-chrome@latest
-        with:
-          chrome-version: "1111197"
 
       - uses: actions/checkout@v2
       - name: Set up python ${{ matrix.python-version}}
