@@ -359,11 +359,28 @@ def xlsx2html(
     append_lineno=(lambda dumb1, dumb2: True),
     default_cell_border="none",
 ):
+    """
+
+    :param filepath: the path to open or a file-like object
+    :type filepath: string or a file-like object open in binary mode c.f., :class:`zipfile.ZipFile`
+    :param output: the path to open or a file-like object
+    :param locale: string or a file-like object open in binary mode c.f., :class:`zipfile.ZipFile`
+    :param sheet: if `None` - first sheet; if `-1` - all sheets;
+        if string sheet name.
+        if number - sheet index. can also use list of names or indexes
+    :param parse_formula:
+    :param append_headers:
+    :param append_lineno:
+    :param default_cell_border:
+    :return:
+    """
     wb = openpyxl.load_workbook(filepath, data_only=True)
     sheet_list = [sheet]
     if isinstance(sheet, (list, tuple)):
         # TODO any iterable
         sheet_list = sheet
+    elif sheet == -1:
+        sheet_list = wb.sheetnames
 
     if not output:
         output = io.StringIO()

@@ -79,3 +79,8 @@ def test_multiple_sheets(temp_file):
     xlsx2html(XLSX_FILE, out_file, locale="en", sheet=wb.sheetnames)  # Can use index
     result_html = open(out_file).read()
     assert result_html.count("</table>") == 3
+
+    out_file = temp_file()
+    xlsx2html(XLSX_FILE, out_file, locale="en", sheet=-1)  # All sheets
+    result_html = open(out_file).read()
+    assert result_html.count("</table>") == 3
