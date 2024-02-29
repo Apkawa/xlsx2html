@@ -3,6 +3,7 @@ import datetime
 import six
 from babel.dates import LC_TIME
 from babel.numbers import LC_NUMERIC
+from openpyxl.utils.escape import unescape
 
 from xlsx2html.constants import BUILTIN_FORMATS
 from .dt import format_time, format_datetime, format_date, format_timedelta
@@ -13,6 +14,8 @@ from .number import format_decimal
 
 def format_cell(cell, locale=None, f_cell=None):
     value = cell.value
+    if isinstance(value, str):
+        value = unescape(value)
     formatted_value = value if value == 0 else value or "&nbsp;"
     cell_format = cell.number_format
     if not cell_format:

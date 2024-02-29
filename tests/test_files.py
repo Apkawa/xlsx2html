@@ -5,7 +5,7 @@ import os
 import openpyxl
 import pytest
 
-from xlsx2html.core import xlsx2html
+from xlsx2html.core import xlsx2html, worksheet_to_data
 
 FIXTURES_ROOT = os.path.join(os.path.dirname(__file__), "fixtures")
 
@@ -57,6 +57,42 @@ def test_issue_30_cell_range_value(temp_file):
     )
     result_html = open(out_file).read()
     assert result_html
+
+
+def test_issue_43(temp_file):
+    """
+    For reproduce run test with non utf-8 locale
+    1) add line "bg_BG.CP1251 CP1251" into `/etc/locale.gen`
+    2) sudo run locale-gen
+    3) LC_ALL=bg_BG.CP1251 pytest -k test_issue_43
+    """
+
+    out_file = temp_file()
+    xlsx2html(get_fixture("fileoutpart12.xlsx"), out_file, parse_formula=True)
+    result_html = open(out_file).read()
+    assert result_html
+
+    with pytest.raises(UnicodeError) as e:
+        # simulate open system encoding
+        out_file = open(temp_file(), "w", encoding="cp1251")
+        xlsx2html(get_fixture("fileoutpart12.xlsx"), out_file, parse_formula=True)
+    assert "output must be opened with encoding='utf-8'" == str(e.value)
+
+
+def test_issue_x000D(temp_file):
+    """
+    Fix _x000D_ issue
+    https://stackoverflow.com/questions/29976234/openpyxl-unicode-values
+    """
+    wb = openpyxl.load_workbook(get_fixture("fileoutpart12.xlsx"))
+    ws = wb.worksheets[0]
+    cell = ws["A1"]
+    # opps :3
+    assert cell.value == "Parameter _x000D_"
+    data = worksheet_to_data(ws)
+    data_cell = data["rows"][0][0]
+    assert data_cell["value"] == "Parameter \r"
+    assert data_cell["formatted_value"] == "Parameter \r"
 
 
 @pytest.mark.webtest()

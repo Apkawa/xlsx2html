@@ -49,6 +49,29 @@ jobs:
           pip install tox python-coveralls codecov
       - name: Run tests
         run: tox
+      - name: Set locale
+        run: |
+          sudo apt-get update && sudo apt-get install tzdata locales -y
+          sudo localedef -f CP1251 -i /usr/share/i18n/locales/bg_BG /usr/lib/locale/bg_BG.CP1251
+          sudo echo 'bg_BG.CP1251 CP1251' | sudo tee -a /etc/locale.gen > /dev/null
+          sudo mkdir /usr/local/share/i18n
+          sudo touch /usr/local/share/i18n/SUPPORTED
+          sudo echo 'bg_BG.CP1251 CP1251' | sudo tee -a /usr/local/share/i18n/SUPPORTED > /dev/null
+          sudo locale-gen bg_BG.UTF-8
+          sudo locale-gen bg_BG
+          sudo locale-gen
+          sudo update-locale LANG=bg_BG.CP1251
+          locale -a
+          echo "Actual locale"
+          locale
+          echo "Actual numeric settings"
+          locale -c -k LC_NUMERIC
+          echo "LANG Variable"
+          echo "$LANG"
+          echo "LocaleCtl"
+          localectl status
+      - name: Run tests
+        run: tox
       - uses: codecov/codecov-action@v1
         with:
           env_vars: OS,PYTHON,TOXENV

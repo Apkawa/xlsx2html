@@ -10,6 +10,7 @@ from openpyxl.drawing.image import Image
 from openpyxl.drawing.spreadsheet_drawing import AnchorMarker
 from openpyxl.styles.colors import COLOR_INDEX, aRGB_REGEX
 from openpyxl.utils import rows_from_range, column_index_from_string, units
+from openpyxl.utils.escape import unescape
 from openpyxl.worksheet.worksheet import Worksheet
 
 from xlsx2html.compat import OPENPYXL_24
@@ -215,11 +216,13 @@ def worksheet_to_data(ws, locale=None, fs=None, default_cell_border="none"):
             f_cell = None
             if fs:
                 f_cell = fs[cell.coordinate]
-
+            value = cell.value
+            if isinstance(value, str):
+                value = unescape(value)
             cell_data = {
                 "column": cell.column,
                 "row": cell.row,
-                "value": cell.value,
+                "value": value,
                 "formatted_value": format_cell(cell, locale=locale, f_cell=f_cell),
                 "attrs": {"id": get_cell_id(cell)},
                 "style": {"height": f"{height}pt"},
@@ -385,7 +388,10 @@ def xlsx2html(
     if not output:
         output = io.StringIO()
     if isinstance(output, str):
-        output = open(output, "w")
+        output = open(output, "w", encoding="utf-8")
+    if output.encoding and output.encoding not in ["utf-8", "utf-16"]:
+        raise UnicodeError("output must be opened with encoding='utf-8'")
+
     html_tables = []
     for sheet in sheet_list:
         ws = get_sheet(wb, sheet)
@@ -399,6 +405,7 @@ def xlsx2html(
         )
         html_tables.append(render_table(data, append_headers, append_lineno))
 
-    output.write(HTML_TEMPLATE % "\n".join(html_tables))
+    html = HTML_TEMPLATE % "\n".join(html_tables)
+    output.write(html)
     output.flush()
     return output
