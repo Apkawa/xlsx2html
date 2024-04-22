@@ -115,7 +115,7 @@ def get_styles_from_cell(cell, merged_cell_map=None, default_cell_border="none")
         if cell.font.i:
             h_styles["font-style"] = "italic"
         if cell.font.u:
-            h_styles["font-decoration"] = "underline"
+            h_styles["text-decoration"] = "underline"
     return h_styles
 
 
