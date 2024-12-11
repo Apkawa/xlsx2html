@@ -1,7 +1,7 @@
 import base64
 import mimetypes
 
-from typing.io import BinaryIO
+from typing import BinaryIO
 
 
 class FileNotFoundError(Exception):
