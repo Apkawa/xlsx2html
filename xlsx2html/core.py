@@ -346,7 +346,7 @@ def get_sheet(wb, sheet):
     ws = wb.active
     if sheet is not None:
         try:
-            ws = wb.get_sheet_by_name(sheet)
+            ws = wb[sheet]
         except KeyError:
             ws = wb.worksheets[sheet]
     return ws
