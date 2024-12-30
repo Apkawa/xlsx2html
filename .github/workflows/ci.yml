@@ -37,6 +37,8 @@ jobs:
     steps:
       # chrome headless
       - uses: browser-actions/setup-chrome@latest
+        with:
+          chrome-version: 120
 
       - uses: actions/checkout@v2
       - name: Set up python ${{ matrix.python-version}}

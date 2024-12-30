@@ -1,7 +1,8 @@
 # Run tests
 ```bash
 pip install -r requirements.txt
-pytest # run tests
+pip install chromedriver-binary-auto
+pytest --splinter-headless # run tests
 tox # run test matrix
 ```
 
