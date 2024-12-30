@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.8, 3.9, '3.10', '3.11', '3.12']
+        python-version: [3.8, 3.9, '3.10', '3.11', '3.12', '3.13']
         toxenv: [""]
         experimental: [ false ]
         include:
@@ -25,9 +25,9 @@ jobs:
             experimental: false
             python-version: 3.7
           - experimental: true
-            python-version: "3.13.0-alpha.1 - 3.13"
+            python-version: "3.14.0-alpha.1 - 3.14"
           - experimental: true
-            python-version: "pypy-3.7"
+            python-version: "pypy-3.8"
 
 
     continue-on-error: ${{ matrix.experimental }}
@@ -71,7 +71,7 @@ jobs:
           echo "LocaleCtl"
           localectl status
       - name: Run tests
-        run: tox
+        run: LC_ALL=bg_BG.CP1251 tox
       - uses: codecov/codecov-action@v1
         with:
           env_vars: OS,PYTHON,TOXENV

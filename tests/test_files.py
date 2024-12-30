@@ -72,6 +72,13 @@ def test_issue_43(temp_file):
     result_html = open(out_file).read()
     assert result_html
 
+    stream = xlsx2html(
+        get_fixture("fileoutpart12.xlsx"), output=None, parse_formula=True
+    )
+    stream.seek(0)
+    result_html = stream.read()
+    assert result_html
+
     with pytest.raises(UnicodeError) as e:
         # simulate open system encoding
         out_file = open(temp_file(), "w", encoding="cp1251")

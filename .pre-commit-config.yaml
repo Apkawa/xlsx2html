@@ -20,7 +20,7 @@ repos:
       - id: pytest
         name: pytest
         language: system
-        entry: tox -e py3
+        entry: tox -e py311
         pass_filenames: false
         always_run: true
       - id: flake8
