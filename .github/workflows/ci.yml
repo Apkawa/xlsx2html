@@ -72,11 +72,19 @@ jobs:
           echo "$LANG"
           echo "LocaleCtl"
           localectl status
-      - name: Run tests
+      - name: Run tests with another locale
         run: LC_ALL=bg_BG.CP1251 tox
       - uses: codecov/codecov-action@v1
         with:
           env_vars: OS,PYTHON,TOXENV
+
+      - name: Test data
+        uses: actions/upload-artifact@v4
+        if: ${{ failure() }}
+        with:
+          name: tests
+          include-hidden-files: true
+          path: ${{ github.workspace }}
 
   publish:
     name: Build and publish Python distributions to PyPI and TestPyPI
