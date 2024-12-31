@@ -16,7 +16,7 @@ splinter>=0.21,<0.22
 #chromedriver-binary-auto
 diffimg==0.2.3
 #mypy>=0.901
-pytest-image-diff>=0.0.2
+pytest-image-diff>=0.0.14
 # Docs
 recommonmark
 Sphinx

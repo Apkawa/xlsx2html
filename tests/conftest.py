@@ -21,6 +21,14 @@ def image_diff_threshold():
     return 0.05
 
 
+@pytest.fixture(scope="session")
+def image_diff_color_mode():
+    """
+    Normalize color mode. RGB, RGBA, None. Default None - do nothing
+    """
+    return "RGB"
+
+
 @pytest.fixture(scope="function")
 def temp_file():
     temp_files = []
@@ -50,9 +58,11 @@ def splinter_driver_kwargs(request, splinter_webdriver):
         executable = request.config.option.splinter_webdriver_executable
         if not executable:
             from chromedriver_binary import chromedriver_filename
+
             executable = chromedriver_filename
         from selenium.webdriver.chrome.service import Service
-        kw['service'] = Service(executable_path=executable)
+
+        kw["service"] = Service(executable_path=executable)
     return kw
 
 
