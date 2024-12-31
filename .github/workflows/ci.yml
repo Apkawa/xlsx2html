@@ -38,7 +38,7 @@ jobs:
       # chrome headless
       - uses: browser-actions/setup-chrome@latest
         with:
-          chrome-version: 114
+          chrome-version: 131
 
       - uses: actions/checkout@v2
       - name: Set up python ${{ matrix.python-version}}
@@ -82,11 +82,12 @@ jobs:
         uses: actions/upload-artifact@v4
         if: ${{ failure() }}
         with:
-          name: "test-data-${{ matrix.python-version }} ${{ matrix.toxenv }}"
+          name: "test-data-${{ matrix.python-version }}-${{ matrix.toxenv }}-${{ github.run_number }}"
           include-hidden-files: true
           path: |
             ${{ github.workspace }}/.tests/
             ${{ github.workspace }}/tests/
+            ${{ github.workspace }}/tests.*/
 
 
   publish:
