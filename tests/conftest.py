@@ -2,6 +2,7 @@ import os
 import tempfile
 
 import pytest
+import splinter
 
 FIXTURES_ROOT = os.path.join(os.path.dirname(__file__), "fixtures")
 
@@ -46,12 +47,25 @@ def temp_file():
 
 
 @pytest.fixture(scope="session")
+def splinter_window_size():
+    return (1280, 1024)
+
+
+@pytest.fixture(scope="session")
+def splinter_headless(request):
+    """Flag to start the browser in headless mode."""
+    if request.config.option.splinter_headless:
+        return "old"
+    return False
+
+
+@pytest.fixture(scope="session")
 def splinter_webdriver(request):
     return request.config.option.splinter_webdriver or "chrome"
 
 
 @pytest.fixture(scope="session")
-def splinter_driver_kwargs(request, splinter_webdriver):
+def splinter_driver_kwargs(request, splinter_webdriver, splinter_window_size):
     kw = {}
     # TODO check for another browsers https://github.com/cobrateam/splinter/pull/1132/
     if splinter_webdriver == "chrome":
@@ -61,8 +75,14 @@ def splinter_driver_kwargs(request, splinter_webdriver):
 
             executable = chromedriver_filename
         from selenium.webdriver.chrome.service import Service
+        from selenium.webdriver.chrome.options import Options as ChromeOptions
 
-        kw["service"] = Service(executable_path=executable)
+        options = ChromeOptions()
+        options.add_argument(f"--window-size={','.join(map(str,splinter_window_size))}")
+        kw["options"] = options
+        kw["service"] = Service(
+            executable_path=executable,
+        )
     return kw
 
 
