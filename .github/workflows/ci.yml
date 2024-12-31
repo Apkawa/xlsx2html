@@ -82,9 +82,12 @@ jobs:
         uses: actions/upload-artifact@v4
         if: ${{ failure() }}
         with:
-          name: tests
+          name: "test-data-${{ matrix.python-version }} ${{ matrix.toxenv }}"
           include-hidden-files: true
-          path: ${{ github.workspace }}
+          path: |
+            ${{ github.workspace }}/.tests/
+            ${{ github.workspace }}/tests/
+
 
   publish:
     name: Build and publish Python distributions to PyPI and TestPyPI
