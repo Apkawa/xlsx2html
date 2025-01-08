@@ -25,4 +25,5 @@ def test_image(temp_file, browser, screenshot_regression, fixture_file):
     out_file = temp_file()
     xlsx2html(fixture_file("image.xlsx"), out_file, locale="en", parse_formula=True)
     browser.visit("file://" + out_file)
+    print('Window size', browser.driver.get_window_size())
     screenshot_regression()
