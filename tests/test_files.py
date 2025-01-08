@@ -1,9 +1,11 @@
 # coding: utf-8
 import io
 import os
+import time
 
 import openpyxl
 import pytest
+from PIL import Image
 
 from xlsx2html.core import xlsx2html, worksheet_to_data
 
@@ -101,6 +103,10 @@ def test_issue_x000D(temp_file):
     assert data_cell["value"] == "Parameter \r"
     assert data_cell["formatted_value"] == "Parameter \r"
 
+def page_has_loaded(self):
+    # via https://stackoverflow.com/questions/26566799/wait-until-page-is-loaded-with-selenium-webdriver-for-python
+    page_state = self.driver.execute_script('return document.readyState;')
+    return page_state == 'complete'
 
 @pytest.mark.webtest()
 def test_screenshot_diff(temp_file, browser, screenshot_regression):
@@ -108,7 +114,17 @@ def test_screenshot_diff(temp_file, browser, screenshot_regression):
     out_file = temp_file()
     xlsx2html(XLSX_FILE, out_file, locale="en")
     browser.visit("file://" + out_file)
+    # Wait loading page
+    from selenium.webdriver.support.wait import WebDriverWait
+    WebDriverWait(browser, timeout=10).until(page_has_loaded)
+    time.sleep(1)
+    # Debug CI
     print('Window size', browser.driver.get_window_size())
+    screenshot_file = temp_file(extension=".png")
+    browser.driver.save_screenshot(screenshot_file)
+    im = Image.open(screenshot_file)
+    assert im.size == (1280, 1024)
+    # End debug CI
     screenshot_regression()
 
 
