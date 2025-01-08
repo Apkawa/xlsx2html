@@ -108,6 +108,7 @@ def test_screenshot_diff(temp_file, browser, screenshot_regression):
     out_file = temp_file()
     xlsx2html(XLSX_FILE, out_file, locale="en")
     browser.visit("file://" + out_file)
+    print('Window size', browser.driver.get_window_size())
     screenshot_regression()
 
 
