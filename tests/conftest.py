@@ -2,9 +2,9 @@ import os
 import tempfile
 
 import pytest
-import splinter
 
 FIXTURES_ROOT = os.path.join(os.path.dirname(__file__), "fixtures")
+IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
 
 @pytest.fixture()
