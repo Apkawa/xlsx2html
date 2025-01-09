@@ -57,7 +57,7 @@ def normalize_datetime_format(fmt, fixed_for_time=False):
             return g
 
         t = "".join(plain)
-        t = re.sub(r"[a-z']+", s, t, re.I)
+        t = re.sub(r"[a-z']+", repl=s, string=t, flags=re.I)
         return t
 
     for i, (text, start, end) in enumerate(found):
