@@ -6,14 +6,14 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     name: "python ${{ matrix.python-version }} ${{ matrix.toxenv }}"
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.8, 3.9, '3.10', '3.11', '3.12', '3.13']
+        python-version: [3.8, 3.9, "3.10", "3.11", "3.12", "3.13", "3.14"]
         toxenv: [""]
-        experimental: [ false ]
+        experimental: [false]
         include:
           - toxenv: qa
             python-version: 3.9
@@ -22,10 +22,9 @@ jobs:
             python-version: 3.9
             experimental: false
           - experimental: true
-            python-version: "3.14.0-alpha.1 - 3.14"
+            python-version: "3.15.0-alpha.1 - 3.15"
           - experimental: true
             python-version: "pypy-3.10"
-
 
     continue-on-error: ${{ matrix.experimental }}
     env:
@@ -86,12 +85,11 @@ jobs:
             ${{ github.workspace }}/tests/
             ${{ github.workspace }}/tests.*/
 
-
   publish:
     name: Build and publish Python distributions to PyPI and TestPyPI
     needs:
       - test
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@master
       - name: Set up Python 3.11
