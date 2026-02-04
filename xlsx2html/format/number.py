@@ -2,7 +2,9 @@ import re
 from decimal import Decimal
 
 from babel import Locale
-from babel.numbers import NumberPattern, number_re, parse_grouping, LC_NUMERIC
+from babel.numbers import LC_NUMERIC, NumberPattern, parse_grouping
+
+from ..compat import number_re
 
 ASTERISK_CLEAN_RE = re.compile(r"[*]")
 QUESTION_MARK_RE = re.compile(r"\?")
@@ -96,7 +98,7 @@ class PatternParser:
             if "@" in number:
                 if "." in number and "0" in number:
                     raise ValueError(
-                        "Significant digit patterns can not contain " '"@" or "0"'
+                        'Significant digit patterns can not contain "@" or "0"'
                     )
             if "." in number:
                 integer, fraction = number.rsplit(".", 1)

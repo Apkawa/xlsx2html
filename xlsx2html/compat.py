@@ -12,3 +12,9 @@ try:
 except ImportError:
     # python >= 3.13
     from typing import BinaryIO  # noqa: F401
+
+
+try:
+    from babel.numbers import number_re  # type: ignore[attr-defined]
+except ImportError:
+    from babel.numbers import _number_pattern_re as number_re  # noqa: F401

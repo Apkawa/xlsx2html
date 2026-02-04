@@ -194,7 +194,7 @@ def format_timedelta(timedelta, fmt):
         elif tok == "m":
             plain.append(str(m))
         elif tok == "mm":
-            plain.append(f"{m:0>2}")
+            plain.append(f"{m:0>2}")  # noqa: E231
         elif tok_type == "s":
             if "." in tok:
                 mstok = tok.split(".")[1]

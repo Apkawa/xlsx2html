@@ -9,12 +9,12 @@ from openpyxl.chart.shapes import GraphicalProperties
 from openpyxl.drawing.image import Image
 from openpyxl.drawing.spreadsheet_drawing import AnchorMarker
 from openpyxl.styles.colors import COLOR_INDEX, aRGB_REGEX
-from openpyxl.utils import rows_from_range, column_index_from_string, units
+from openpyxl.utils import column_index_from_string, rows_from_range, units
 from openpyxl.utils.escape import unescape
 from openpyxl.worksheet.worksheet import Worksheet
 
 from xlsx2html.compat import OPENPYXL_24
-from xlsx2html.constants.border import DEFAULT_BORDER_STYLE, BORDER_STYLES
+from xlsx2html.constants.border import BORDER_STYLES, DEFAULT_BORDER_STYLE
 from xlsx2html.format import format_cell
 from xlsx2html.utils.image import bytes_to_datauri
 
@@ -175,7 +175,7 @@ def worksheet_to_data(ws, locale=None, fs=None, default_cell_border="none"):
 
     for cell_range in merged_cell_ranges:
         if ":" not in str(cell_range):
-            cell_range_list = list(ws[f"{cell_range}:{cell_range}"])
+            cell_range_list = list(ws[f"{cell_range}:{cell_range}"])  # noqa: E231
         else:
             cell_range_list = list(ws[cell_range])
 
