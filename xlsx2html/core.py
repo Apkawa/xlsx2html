@@ -130,20 +130,31 @@ def image_to_data(image: Image) -> dict:
     # http://officeopenxml.com/drwSp-location.php
     offsetX = units.EMU_to_pixels(_from.colOff)
     offsetY = units.EMU_to_pixels(_from.rowOff)
-    # TODO recalculate to relative cell
+    col = _from.col + 1
+    row = _from.row + 1
+    offsetX = units.EMU_to_pixels(_from.colOff)
+    offsetY = units.EMU_to_pixels(_from.rowOff)
+
+    if transform and transform.ext:
+        width = units.EMU_to_pixels(transform.ext.width)
+        height = units.EMU_to_pixels(transform.ext.height)
+    else:
+        width = image.width
+        height = image.height
+
     data = {
-        "col": _from.col + 1,
-        "row": _from.row + 1,
+        "col": col,
+        "row": row,
         "offset": {"x": offsetX, "y": offsetY},
-        "width": units.EMU_to_pixels(transform.ext.width),
-        "height": units.EMU_to_pixels(transform.ext.height),
+        "width": width,
+        "height": height,
         "src": bytes_to_datauri(image.ref, image.path),
         "style": {
             "margin-left": f"{offsetX}px",
             "margin-top": f"{offsetY}px",
-            "position": "absolute",
-        },
-    }
+                "position": "absolute",
+            },
+        }
     return data
 
 
