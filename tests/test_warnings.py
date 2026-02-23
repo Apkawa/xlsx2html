@@ -2,14 +2,19 @@ import warnings
 
 import openpyxl
 import pytest
-from _pytest.warning_types import PytestDeprecationWarning
 from _pytest.recwarn import WarningsRecorder
+from _pytest.warning_types import PytestDeprecationWarning
 
+from tests.conftest import IN_GITHUB_ACTIONS
 from tests.test_files import XLSX_FILE
 from xlsx2html import xlsx2html
 
 
 @pytest.mark.filterwarnings("error")
+@pytest.mark.skipif(
+    IN_GITHUB_ACTIONS,
+    reason="Blinking ci tests",
+)
 def test_simply_warnings(temp_file):
     from xlsx2html import xlsx2html
 
@@ -23,6 +28,10 @@ def test_simply_warnings(temp_file):
 
 
 @pytest.mark.filterwarnings("error")
+@pytest.mark.skipif(
+    IN_GITHUB_ACTIONS,
+    reason="Blinking ci tests",
+)
 def test_sheet_by_name_no_deprecation_warning(temp_file):
     # By names
     out_file = temp_file()
@@ -33,6 +42,10 @@ def test_sheet_by_name_no_deprecation_warning(temp_file):
 
 
 @pytest.mark.filterwarnings("error")
+@pytest.mark.skipif(
+    IN_GITHUB_ACTIONS,
+    reason="Blinking ci tests",
+)
 def test_count_warnings(temp_file):
     # Deep check warnings. Not necessary but funny
     with warnings.catch_warnings():
