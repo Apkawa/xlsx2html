@@ -1,4 +1,5 @@
 import datetime
+from html import escape as html_escape
 
 import six
 from babel.dates import LC_TIME
@@ -6,7 +7,8 @@ from babel.numbers import LC_NUMERIC
 from openpyxl.utils.escape import unescape
 
 from xlsx2html.constants import BUILTIN_FORMATS
-from .dt import format_time, format_datetime, format_date, format_timedelta
+
+from .dt import format_date, format_datetime, format_time, format_timedelta
 from .hyperlink import format_hyperlink
 from .locale import extract_locale_from_format
 from .number import format_decimal
@@ -15,7 +17,10 @@ from .number import format_decimal
 def format_cell(cell, locale=None, f_cell=None):
     value = cell.value
     if isinstance(value, str):
+        # Convert escaped strings to ASCIII: _x000a_ == \n
         value = unescape(value)
+        # Escape html in str value
+        value = html_escape(value)
     formatted_value = value if value == 0 else value or "&nbsp;"
     cell_format = cell.number_format
     if not cell_format:

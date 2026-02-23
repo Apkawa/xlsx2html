@@ -1,8 +1,16 @@
+# Install deps
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+pip install chromedriver-binary-auto
+
+```
+
 # Run tests
 
 ```bash
-pip install -r requirements.txt
-pip install chromedriver-binary-auto
 pytest --splinter-headless # run tests
 tox # run test matrix
 ```

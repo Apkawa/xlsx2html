@@ -222,6 +222,7 @@ def worksheet_to_data(ws, locale=None, fs=None, default_cell_border="none"):
             cell_data = {
                 "column": cell.column,
                 "row": cell.row,
+                # Raw value for internal use
                 "value": value,
                 "formatted_value": format_cell(cell, locale=locale, f_cell=f_cell),
                 "attrs": {"id": get_cell_id(cell)},

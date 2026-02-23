@@ -8,7 +8,7 @@ import pytest
 from PIL import Image
 
 from tests.conftest import IN_GITHUB_ACTIONS
-from xlsx2html.core import xlsx2html, worksheet_to_data
+from xlsx2html.core import worksheet_to_data, xlsx2html
 
 FIXTURES_ROOT = os.path.join(os.path.dirname(__file__), "fixtures")
 
@@ -152,3 +152,20 @@ def test_multiple_sheets(temp_file):
     xlsx2html(XLSX_FILE, out_file, locale="en", sheet=-1)  # All sheets
     result_html = open(out_file).read()
     assert result_html.count("</table>") == 3
+
+
+def test_issue_58(temp_file):
+    """
+    Test html escape in text
+    """
+
+    wb = openpyxl.load_workbook(get_fixture("issue_58.xlsx"))
+    ws = wb.worksheets[0]
+    cell = ws["A1"]
+    # opps :3
+    assert cell.value == "<script>alert(1)</script>"
+    data = worksheet_to_data(ws)
+    data_cell = data["rows"][0][0]
+    # Must be escaped
+    assert data_cell["value"] == "<script>alert(1)</script>"
+    assert data_cell["formatted_value"] == "&lt;script&gt;alert(1)&lt;/script&gt;"
