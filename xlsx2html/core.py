@@ -135,8 +135,8 @@ def image_to_data(image: Image) -> dict:
         "col": _from.col + 1,
         "row": _from.row + 1,
         "offset": {"x": offsetX, "y": offsetY},
-        "width": units.EMU_to_pixels(transform.ext.width),
-        "height": units.EMU_to_pixels(transform.ext.height),
+        "width": units.EMU_to_pixels(transform.ext.width if transform and transform.ext else 0),
+        "height": units.EMU_to_pixels(transform.ext.height if transform and transform.ext else 0),
         "src": bytes_to_datauri(image.ref, image.path),
         "style": {
             "margin-left": f"{offsetX}px",
