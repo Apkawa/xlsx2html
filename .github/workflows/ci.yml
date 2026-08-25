@@ -53,6 +53,10 @@ jobs:
       - name: Install project dependencies
         run: uv sync --frozen
 
+      - name: Install webtest deps
+        if: matrix.toxenv  == 'webtest'
+        run: uv sync --frozen --group webtest
+
       - name: Install Playwright browsers and system deps
         if: matrix.toxenv  == 'webtest'
         run: uv run playwright install --with-deps
