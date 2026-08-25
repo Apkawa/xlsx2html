@@ -52,7 +52,7 @@ jobs:
 
     continue-on-error: ${{ matrix.experimental }}
     env:
-      TOXENV: ${{ matrix.toxenv || format('py{0}', substring(matrix.python-version, 2, 2)) }}
+      TOXENV: ${{ matrix.toxenv }}
     steps:
       # chrome headless
       - uses: browser-actions/setup-chrome@latest
