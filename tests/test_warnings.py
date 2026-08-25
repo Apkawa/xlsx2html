@@ -2,8 +2,8 @@ import warnings
 
 import openpyxl
 import pytest
-from _pytest.warning_types import PytestDeprecationWarning
 from _pytest.recwarn import WarningsRecorder
+from _pytest.warning_types import PytestDeprecationWarning
 
 from tests.test_files import XLSX_FILE
 from xlsx2html import xlsx2html
@@ -27,9 +27,7 @@ def test_sheet_by_name_no_deprecation_warning(temp_file):
     # By names
     out_file = temp_file()
     wb = openpyxl.load_workbook(XLSX_FILE)
-    xlsx2html(
-        XLSX_FILE, out_file, locale="en", sheet=wb.sheetnames
-    ).close()  # Can use index
+    xlsx2html(XLSX_FILE, out_file, locale="en", sheet=wb.sheetnames).close()  # Can use index
 
 
 @pytest.mark.filterwarnings("error")

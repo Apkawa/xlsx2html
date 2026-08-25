@@ -1,4 +1,4 @@
-from openpyxl.formula.tokenizer import Tokenizer, Token
+from openpyxl.formula.tokenizer import Token, Tokenizer
 
 from xlsx2html.utils.cell import parse_cell_location
 

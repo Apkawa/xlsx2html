@@ -1,4 +1,5 @@
 import sys
+
 from . import xlsx2html
 
 if __name__ == "__main__":

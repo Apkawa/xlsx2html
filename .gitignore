@@ -155,3 +155,8 @@ fabric.properties
 pyvenv.cfg
 .venv
 pip-selfcheck.json
+
+# uv (sandbox-writable locations, qa_gideline.md §3.4)
+.uv-cache/
+.uv-python/
+.pre-commit-home/

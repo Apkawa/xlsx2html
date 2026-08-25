@@ -2,7 +2,7 @@ import re
 from decimal import Decimal
 
 from babel import Locale
-from babel.numbers import NumberPattern, number_re, parse_grouping, LC_NUMERIC
+from babel.numbers import LC_NUMERIC, NumberPattern, number_re, parse_grouping
 
 ASTERISK_CLEAN_RE = re.compile(r"[*]")
 QUESTION_MARK_RE = re.compile(r"\?")
@@ -28,9 +28,7 @@ class ColorNumberPattern(NumberPattern):
         self.prefix = [COLOR_FORMAT.sub("", p) for p in self.prefix]
 
     def apply(self, value, locale, currency=None, force_frac=None):
-        formatted = super(ColorNumberPattern, self).apply(
-            value, locale, currency, force_frac
-        )
+        formatted = super(ColorNumberPattern, self).apply(value, locale, currency, force_frac)
         return self.apply_color(value, formatted)
 
     def apply_color(self, value, formatted):
@@ -95,9 +93,7 @@ class PatternParser:
                 exp = None
             if "@" in number:
                 if "." in number and "0" in number:
-                    raise ValueError(
-                        "Significant digit patterns can not contain " '"@" or "0"'
-                    )
+                    raise ValueError('Significant digit patterns can not contain "@" or "0"')
             if "." in number:
                 integer, fraction = number.rsplit(".", 1)
             else:

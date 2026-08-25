@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import warnings
+
 from .core import xlsx2html
 
 __all__ = ["xls2html", "xlsx2html"]

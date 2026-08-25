@@ -1,0 +1,84 @@
+[project]
+name = "xlsx2html"
+version = "0.6.2"
+description = "A simple export from xlsx format to html tables with keep cell formatting"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "six",
+    "openpyxl>=2.4.8",
+    # number_re (используется в format/number.py) удалён в babel 2.18
+    "babel>=2.3.4,<2.18",
+    "packaging>=20.4",
+]
+authors = [
+    { name = "Apkawa", email = "apkawa@gmail.com" },
+]
+license = "MIT"
+keywords = ["converter", "xlsx", "html"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Text Processing",
+    "Topic :: Text Processing :: Markup :: HTML",
+]
+urls = { Homepage = "https://github.com/Apkawa/xlsx2html" }
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["xlsx2html*"]
+
+[dependency-groups]
+dev = [
+    "bump-my-version>=0.30.0",
+    "pytest>=8.0.0",
+    "ruff>=0.9.0",
+    "pre-commit>=4.0.0",
+    "mypy>=2.1.0",
+    "tox>=4.60.0",
+    "tox-uv>=1.36.0",
+    # тестовая зависимость: tests/test_files.py импортирует PIL на уровне
+    # модуля (не трогаем тесты — решение по webtest)
+    "Pillow",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["run_xlsx2html.py"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+# TODO: включить strict = true после приведения кода к аннотациям
+# (гайдлайн ai-docs/qa_gideline.md §3.2: strict — стандарт)
+show_error_codes = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "xlsx2html"]
+pythonpath = ["."]
+xfail_strict = true
+addopts = ["--doctest-modules", "-vv"]
+markers = ["webtest: браузерные тесты (env webtest в tox.ini, вне env_list)"]
+
+[tool.bumpversion]
+current_version = "0.6.2"
+parse = "0\\.(?P<minor>[0-9]+)\\.(?P<patch>[0-9]+)"
+serialize = ["0.{minor}.{patch}"]
+files = [
+    { filename = "xlsx2html/__init__.py" },
+]

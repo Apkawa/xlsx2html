@@ -74,12 +74,12 @@ def splinter_driver_kwargs(request, splinter_webdriver, splinter_window_size):
             from chromedriver_binary import chromedriver_filename
 
             executable = chromedriver_filename
-        from selenium.webdriver.chrome.service import Service
         from selenium.webdriver.chrome.options import Options as ChromeOptions
+        from selenium.webdriver.chrome.service import Service
 
         options = ChromeOptions()
-        options.add_argument(f"--window-size={'x'.join(map(str,splinter_window_size))}")
-        options.add_argument(f"--force-device-scale-factor=1")
+        options.add_argument(f"--window-size={'x'.join(map(str, splinter_window_size))}")
+        options.add_argument("--force-device-scale-factor=1")
         kw["options"] = options
         kw["service"] = Service(
             executable_path=executable,

@@ -3,35 +3,19 @@ repos:
     rev: v2.1.1
     hooks:
       - id: conventional-pre-commit
-        stages: [ commit-msg ]
+        stages: [commit-msg]
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.3.0
+    rev: v6.0.0
     hooks:
-      - id: check-yaml
-      - id: check-ast
-      - id: end-of-file-fixer
       - id: trailing-whitespace
-  - repo: https://github.com/psf/black
-    rev: 22.12.0
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: check-yaml
+      - id: check-toml
+      - id: detect-private-key
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.1
     hooks:
-      - id: black
-  - repo: local
-    hooks:
-      - id: pytest
-        name: pytest
-        language: system
-        entry: tox -e py311
-        pass_filenames: false
-        always_run: true
-      - id: flake8
-        name: flake8
-        language: system
-        entry: tox -e qa
-        pass_filenames: false
-        always_run: true
-      - id: mypy
-        name: mypy
-        language: system
-        entry: tox -e type
-        pass_filenames: false
-        always_run: true
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format

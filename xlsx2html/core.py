@@ -9,12 +9,12 @@ from openpyxl.chart.shapes import GraphicalProperties
 from openpyxl.drawing.image import Image
 from openpyxl.drawing.spreadsheet_drawing import AnchorMarker
 from openpyxl.styles.colors import COLOR_INDEX, aRGB_REGEX
-from openpyxl.utils import rows_from_range, column_index_from_string, units
+from openpyxl.utils import column_index_from_string, rows_from_range, units
 from openpyxl.utils.escape import unescape
 from openpyxl.worksheet.worksheet import Worksheet
 
 from xlsx2html.compat import OPENPYXL_24
-from xlsx2html.constants.border import DEFAULT_BORDER_STYLE, BORDER_STYLES
+from xlsx2html.constants.border import BORDER_STYLES, DEFAULT_BORDER_STYLE
 from xlsx2html.format import format_cell
 from xlsx2html.utils.image import bytes_to_datauri
 
@@ -22,20 +22,14 @@ from xlsx2html.utils.image import bytes_to_datauri
 def render_attrs(attrs):
     if not attrs:
         return ""
-    return " ".join(
-        ['%s="%s"' % a for a in sorted(attrs.items(), key=lambda a: a[0]) if a[1]]
-    )
+    return " ".join(['%s="%s"' % a for a in sorted(attrs.items(), key=lambda a: a[0]) if a[1]])
 
 
 def render_inline_styles(styles):
     if not styles:
         return ""
     return ";".join(
-        [
-            "%s: %s" % a
-            for a in sorted(styles.items(), key=lambda a: a[0])
-            if a[1] is not None
-        ]
+        ["%s: %s" % a for a in sorted(styles.items(), key=lambda a: a[0]) if a[1] is not None]
     )
 
 
@@ -298,18 +292,12 @@ def render_table(data, append_headers, append_lineno):
             for img in images:
                 styles = render_inline_styles(img["style"])
                 img_tag = (
-                    '<img width="{width}" height="{height}"'
-                    'style="{styles_str}"'
-                    'src="{src}"'
-                    "/>"
+                    '<img width="{width}" height="{height}"style="{styles_str}"src="{src}"/>'
                 ).format(styles_str=styles, **img)
                 formatted_images.append(img_tag)
             trow.append(
                 (
-                    '<td {attrs_str} style="{styles_str}">'
-                    "{formatted_images}"
-                    "{formatted_value}"
-                    "</td>"
+                    '<td {attrs_str} style="{styles_str}">{formatted_images}{formatted_value}</td>'
                 ).format(
                     attrs_str=render_attrs(cell["attrs"]),
                     styles_str=render_inline_styles(cell["style"]),
@@ -400,9 +388,7 @@ def xlsx2html(
             fb = openpyxl.load_workbook(filepath, data_only=False)
             fs = get_sheet(fb, sheet)
 
-        data = worksheet_to_data(
-            ws, locale=locale, fs=fs, default_cell_border=default_cell_border
-        )
+        data = worksheet_to_data(ws, locale=locale, fs=fs, default_cell_border=default_cell_border)
         html_tables.append(render_table(data, append_headers, append_lineno))
 
     html = HTML_TEMPLATE % "\n".join(html_tables)

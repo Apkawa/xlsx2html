@@ -1,28 +1,61 @@
-# Run tests
+# Install
+
 ```bash
-pip install -r requirements.txt
-pip install chromedriver-binary-auto
-pytest --splinter-headless # run tests
-tox # run test matrix
+uv sync
 ```
 
-# Run tests with pyenv with specific python and pypy
+# QA
 
-1. Ensure `VIRTUALENV_DISCOVERY=pyenv` in env https://github.com/un-def/virtualenv-pyenv/blob/master/README.md
+QA stack (uv / ruff / mypy / pytest / tox + tox-uv / pre-commit / bump-my-version):
 
-
+```bash
+uv run tox                        # lint, format, type, py310-py313
+uv run pytest --skip-webtest      # test suite without browser tests
+uv run mypy xlsx2html             # type check (basic; see [tool.mypy] TODO)
+uv run ruff check                 # lint
+uv run ruff format                # format
+uv run pre-commit run --all-files
+uv run bump-my-version bump minor|patch   # zero versioning 0.{minor}.{patch}
 ```
-pyenv install 3.12 pypy3.7-7.3.5
-pyenv local 3.12 pypy3.7-7.3.5
-pip install -r requirements.txt
-tox -e py312,pypy3
+
+Sandbox (writable cache):
+
+```bash
+export UV_CACHE_DIR=$PWD/.uv-cache UV_LINK_MODE=clone UV_PYTHON_INSTALL_DIR=$PWD/.uv-python
+export PRE_COMMIT_HOME=$PWD/.pre-commit-home
 ```
 
+## Browser tests (webtest)
+
+Manual, outside `env_list` (splinter + chromedriver):
+
+```bash
+tox -e webtest
+```
+
+## wsl2
+
+With wsl2 need additional steps
+
+For Ubuntu-24.04
+
+1) install chrome deps
+```bash
+sudo apt-get update
+sudo apt-get install -y curl unzip xvfb libxi6 libgconf-2-4
+```
+2) Install chrome-stable
+```bash
+wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+sudo apt install ./google-chrome-stable_current_amd64.deb
+```
+
+3) Ensure chromedriver avaiable in path
+
+ref: https://www.gregbrisebois.com/posts/chromedriver-in-wsl2/
 
 # Before commit
 
-```
+```bash
 pre-commit install
 ```
-
-For pycharm needs install `tox` to global

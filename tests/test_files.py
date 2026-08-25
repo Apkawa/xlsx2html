@@ -8,7 +8,7 @@ import pytest
 from PIL import Image
 
 from tests.conftest import IN_GITHUB_ACTIONS
-from xlsx2html.core import xlsx2html, worksheet_to_data
+from xlsx2html.core import worksheet_to_data, xlsx2html
 
 FIXTURES_ROOT = os.path.join(os.path.dirname(__file__), "fixtures")
 
@@ -55,9 +55,7 @@ def test_hyperlink(temp_file):
 
 def test_issue_30_cell_range_value(temp_file):
     out_file = temp_file()
-    xlsx2html(
-        get_fixture("cell_range_value.xlsx"), out_file, locale="en", parse_formula=True
-    )
+    xlsx2html(get_fixture("cell_range_value.xlsx"), out_file, locale="en", parse_formula=True)
     result_html = open(out_file).read()
     assert result_html
 
@@ -75,9 +73,7 @@ def test_issue_43(temp_file):
     result_html = open(out_file).read()
     assert result_html
 
-    stream = xlsx2html(
-        get_fixture("fileoutpart12.xlsx"), output=None, parse_formula=True
-    )
+    stream = xlsx2html(get_fixture("fileoutpart12.xlsx"), output=None, parse_formula=True)
     stream.seek(0)
     result_html = stream.read()
     assert result_html
