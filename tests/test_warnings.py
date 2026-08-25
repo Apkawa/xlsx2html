@@ -36,9 +36,7 @@ def test_sheet_by_name_no_deprecation_warning(temp_file):
     # By names
     out_file = temp_file()
     wb = openpyxl.load_workbook(XLSX_FILE)
-    xlsx2html(
-        XLSX_FILE, out_file, locale="en", sheet=wb.sheetnames
-    ).close()  # Can use index
+    xlsx2html(XLSX_FILE, out_file, locale="en", sheet=wb.sheetnames).close()  # Can use index
 
 
 @pytest.mark.filterwarnings("error")

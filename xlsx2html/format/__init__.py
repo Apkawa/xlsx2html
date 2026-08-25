@@ -40,13 +40,13 @@ def format_cell(cell, locale=None, f_cell=None):
     if new_locale:
         locale = new_locale
 
-    if type(value) == datetime.date:
+    if type(value) is datetime.date:
         formatted_value = format_date(value, cell_format, locale=locale)
-    elif type(value) == datetime.datetime:
+    elif type(value) is datetime.datetime:
         formatted_value = format_datetime(value, cell_format, locale=locale)
-    elif type(value) == datetime.time:
+    elif type(value) is datetime.time:
         formatted_value = format_time(value, cell_format, locale=locale)
-    elif type(value) == datetime.timedelta:
+    elif type(value) is datetime.timedelta:
         formatted_value = format_timedelta(value, cell_format)
 
     formatted_value = format_hyperlink(formatted_value, cell, f_cell)

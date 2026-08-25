@@ -5,8 +5,13 @@ import datetime
 
 import pytest
 
-from xlsx2html.format import format_decimal
-from xlsx2html.format import format_date, format_datetime, format_time, format_timedelta
+from xlsx2html.format import (
+    format_date,
+    format_datetime,
+    format_decimal,
+    format_time,
+    format_timedelta,
+)
 from xlsx2html.format.dt import normalize_datetime_format
 
 decimal_formats = [

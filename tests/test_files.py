@@ -1,11 +1,9 @@
 # coding: utf-8
 import io
 import os
-import time
 
 import openpyxl
 import pytest
-from PIL import Image
 
 from tests.conftest import IN_GITHUB_ACTIONS
 from xlsx2html.core import worksheet_to_data, xlsx2html
@@ -55,9 +53,7 @@ def test_hyperlink(temp_file):
 
 def test_issue_30_cell_range_value(temp_file):
     out_file = temp_file()
-    xlsx2html(
-        get_fixture("cell_range_value.xlsx"), out_file, locale="en", parse_formula=True
-    )
+    xlsx2html(get_fixture("cell_range_value.xlsx"), out_file, locale="en", parse_formula=True)
     result_html = open(out_file).read()
     assert result_html
 
@@ -75,9 +71,7 @@ def test_issue_43(temp_file):
     result_html = open(out_file).read()
     assert result_html
 
-    stream = xlsx2html(
-        get_fixture("fileoutpart12.xlsx"), output=None, parse_formula=True
-    )
+    stream = xlsx2html(get_fixture("fileoutpart12.xlsx"), output=None, parse_formula=True)
     stream.seek(0)
     result_html = stream.read()
     assert result_html
@@ -116,24 +110,17 @@ def page_has_loaded(self):
     IN_GITHUB_ACTIONS,
     reason="Have issue with no match screenshot size same screen size",
 )
-def test_screenshot_diff(temp_file, browser, screenshot_regression):
-    browser.driver.set_window_size(1280, 1024)
+def test_screenshot_diff(temp_file, page, image_regression):
+    # browser.driver.set_window_size(1280, 1024)
     out_file = temp_file()
     xlsx2html(XLSX_FILE, out_file, locale="en")
-    browser.visit("file://" + out_file)
-    # Wait loading page
-    from selenium.webdriver.support.wait import WebDriverWait
-
-    WebDriverWait(browser, timeout=10).until(page_has_loaded)
-    time.sleep(1)
-    # Debug CI
-    print("Window size", browser.driver.get_window_size())
+    page.goto("file://" + out_file)
     screenshot_file = temp_file(extension=".png")
-    browser.driver.save_screenshot(screenshot_file)
-    im = Image.open(screenshot_file)
-    assert im.size == (1280, 1024)
+    page.screenshot(path=screenshot_file)
+    # im = Image.open(screenshot_file)
+    # assert im.size == (1280, 1024)
     # End debug CI
-    screenshot_regression()
+    image_regression(screenshot_file)
 
 
 def test_multiple_sheets(temp_file):

@@ -6,9 +6,7 @@ import re
 from babel import dates as babel_dates
 from babel.dates import LC_TIME
 
-RE_DATE_TOK = re.compile(
-    r'(?:\\[\\*_"]?|_.|\*.|y+|m+|d+|h+|s+|\.0+|am/pm|a/p|"[^"]*")', re.I
-)
+RE_DATE_TOK = re.compile(r'(?:\\[\\*_"]?|_.|\*.|y+|m+|d+|h+|s+|\.0+|am/pm|a/p|"[^"]*")', re.I)
 RE_TD_TOK = re.compile(
     r'(?:\\[\\*_"]?|_.|\*.|\[h+\]|\[m+\]|\[s+\](?:\.0+)?|m+|s+(?:\.0+)?|h+|y+|d+|"[^"]*")',
     re.I,

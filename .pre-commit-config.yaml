@@ -3,35 +3,57 @@ repos:
     rev: v2.1.1
     hooks:
       - id: conventional-pre-commit
-        stages: [ commit-msg ]
+        stages: [commit-msg]
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.3.0
+    rev: v6.0.0
     hooks:
-      - id: check-yaml
-      - id: check-ast
-      - id: end-of-file-fixer
       - id: trailing-whitespace
-  - repo: https://github.com/psf/black
-    rev: 22.12.0
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: check-yaml
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: debug-statements
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-illegal-windows-names
+      - id: detect-private-key
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.1
     hooks:
-      - id: black
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
   - repo: local
     hooks:
       - id: pytest
         name: pytest
         language: system
-        entry: tox -e py311
+        entry: tox -e py312
         pass_filenames: false
         always_run: true
-      - id: flake8
-        name: flake8
+      - id: lint
+        name: lint
         language: system
-        entry: tox -e qa
+        entry: tox -e lint
         pass_filenames: false
         always_run: true
-      - id: mypy
-        name: mypy
+      - id: format
+        name: format
+        language: system
+        entry: tox -e lint
+        pass_filenames: false
+        always_run: true
+      - id: type
+        name: type
         language: system
         entry: tox -e type
         pass_filenames: false
         always_run: true
+
+  # - repo: https://github.com/rhysd/actionlint
+  #   rev: v1.7.12
+  #   hooks:
+  #     - id: actionlint
