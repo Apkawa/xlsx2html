@@ -11,10 +11,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
-        toxenv: [""]
-        experimental: [ false ]
         include:
+          - python-version: '3.10'
+            toxenv: py310
+            experimental: false
+          - python-version: '3.11'
+            toxenv: py311
+            experimental: false
+          - python-version: '3.12'
+            toxenv: py312
+            experimental: false
+          - python-version: '3.13'
+            toxenv: py313
+            experimental: false
+          - python-version: '3.14'
+            toxenv: py314
+            experimental: false
+          - python-version: '3.15'
+            toxenv: py315
+            experimental: false
+
           - toxenv: lint
             python-version: 3.12
             experimental: false
