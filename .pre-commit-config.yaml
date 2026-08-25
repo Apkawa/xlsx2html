@@ -12,6 +12,11 @@ repos:
       - id: mixed-line-ending
       - id: check-yaml
       - id: check-toml
+      - id: check-merge-conflict
+      - id: debug-statements
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-illegal-windows-names
       - id: detect-private-key
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.1
@@ -19,3 +24,8 @@ repos:
       - id: ruff
         args: [--fix]
       - id: ruff-format
+
+  # - repo: https://github.com/rhysd/actionlint
+  #   rev: v1.7.12
+  #   hooks:
+  #     - id: actionlint

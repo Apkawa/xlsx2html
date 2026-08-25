@@ -20,10 +20,10 @@ def test_to_datauri(fixture_file):
 
 
 @pytest.mark.webtest()
-def test_image(temp_file, browser, screenshot_regression, fixture_file):
-    browser.driver.set_window_size(1280, 1024)
+def test_image(temp_file, page, image_regression, fixture_file):
     out_file = temp_file()
     xlsx2html(fixture_file("image.xlsx"), out_file, locale="en", parse_formula=True)
-    browser.visit("file://" + out_file)
-    print("Window size", browser.driver.get_window_size())
-    screenshot_regression()
+    page.goto("file://" + out_file)
+    screenshot_file = temp_file(extension=".png")
+    page.screenshot(path=screenshot_file)
+    image_regression(screenshot_file)

@@ -27,13 +27,20 @@ export PRE_COMMIT_HOME=$PWD/.pre-commit-home
 
 ## Browser tests (webtest)
 
-Manual, outside `env_list` (splinter + chromedriver):
+Manual, outside `env_list` (playwright + chromedriver):
+
+### Setup
+
+- `uv sync --group webtest`
+- `uv run playwright install --with-deps`
+
+### Run webtest
 
 ```bash
-tox -e webtest
+uv run tox -e webtest
 ```
 
-## wsl2
+## wsl2 (may be obsolete)
 
 With wsl2 need additional steps
 

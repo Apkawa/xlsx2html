@@ -78,7 +78,7 @@ def splinter_driver_kwargs(request, splinter_webdriver, splinter_window_size):
         from selenium.webdriver.chrome.service import Service
 
         options = ChromeOptions()
-        options.add_argument(f"--window-size={'x'.join(map(str, splinter_window_size))}")
+        options.add_argument(f"--window-size={','.join(map(str, splinter_window_size))}")
         options.add_argument("--force-device-scale-factor=1")
         kw["options"] = options
         kw["service"] = Service(
@@ -95,6 +95,17 @@ def splinter_webdriver_executable(request, splinter_webdriver):
         # Workaround for never chromedriver
         return None
     return os.path.abspath(executable) if executable else None
+
+
+@pytest.fixture(scope="session")
+def browser_context_args(browser_context_args):
+    return {
+        **browser_context_args,
+        "viewport": {
+            "width": 1280,
+            "height": 1024,
+        },
+    }
 
 
 def pytest_addoption(parser):

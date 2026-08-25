@@ -25,6 +25,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Text Processing",
     "Topic :: Text Processing :: Markup :: HTML",
 ]
@@ -49,6 +50,12 @@ dev = [
     # тестовая зависимость: tests/test_files.py импортирует PIL на уровне
     # модуля (не трогаем тесты — решение по webtest)
     "Pillow",
+]
+webtest = [
+  "playwright",
+  "pytest-playwright",
+  "diffimg==0.2.3",
+  "pytest-image-diff>=0.0.14",
 ]
 
 [tool.ruff]

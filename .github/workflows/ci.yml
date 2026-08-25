@@ -6,23 +6,29 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     name: "python ${{ matrix.python-version }} ${{ matrix.toxenv }}"
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.8, 3.9, '3.10', '3.11', '3.12', '3.13']
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
         toxenv: [""]
         experimental: [ false ]
         include:
-          - toxenv: qa
-            python-version: 3.9
+          - toxenv: lint
+            python-version: 3.12
+            experimental: false
+          - toxenv: format
+            python-version: 3.12
             experimental: false
           - toxenv: type
-            python-version: 3.9
+            python-version: 3.12
+            experimental: false
+          - toxenv: webtest
+            python-version: 3.12
             experimental: false
           - experimental: true
-            python-version: "3.14.0-alpha.1 - 3.14"
+            python-version: "3.15.0-alpha.1 - 3.15"
           - experimental: true
             python-version: "pypy-3.10"
 
@@ -30,7 +36,6 @@ jobs:
     continue-on-error: ${{ matrix.experimental }}
     env:
       TOXENV: ${{ matrix.toxenv }}
-      CHROMEDRIVER_PACKAGE: "chromedriver-binary-auto"
     steps:
       # chrome headless
       - uses: browser-actions/setup-chrome@latest
@@ -38,16 +43,23 @@ jobs:
           chrome-version: 131
 
       - uses: actions/checkout@v2
-      - name: Set up python ${{ matrix.python-version}}
-        uses: actions/setup-python@v2
+
+      - name: Install uv for ${{ matrix.python-version}}
+        uses: astral-sh/setup-uv@v5
         with:
+          enable-cache: true # Включает кэширование зависимостей uv
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install tox python-coveralls codecov
+
+      - name: Install project dependencies
+        run: uv sync --frozen
+
+      - name: Install Playwright browsers and system deps
+        if: matrix.toxenv  == 'webtest'
+        run: uv run playwright install --with-deps
+
       - name: Run tests
         run: tox
+
       - name: Set locale
         run: |
           sudo apt-get update && sudo apt-get install tzdata locales -y
@@ -71,6 +83,7 @@ jobs:
           localectl status
       - name: Run tests with another locale
         run: LC_ALL=bg_BG.CP1251 tox
+
       - uses: codecov/codecov-action@v1
         with:
           env_vars: OS,PYTHON,TOXENV
@@ -91,13 +104,13 @@ jobs:
     name: Build and publish Python distributions to PyPI and TestPyPI
     needs:
       - test
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@master
-      - name: Set up Python 3.11
+      - name: Set up Python 3.12
         uses: actions/setup-python@v1
         with:
-          python-version: 3.11
+          python-version: 3.12
       - name: Install pypa/build
         run: >-
           python -m
