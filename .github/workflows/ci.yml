@@ -109,7 +109,7 @@ jobs:
           env_vars: OS,PYTHON,TOXENV
 
       - name: Test data
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: ${{ failure() }}
         with:
           name: "test-data-${{ matrix.python-version }}-${{ matrix.toxenv }}-${{ github.run_number }}"
