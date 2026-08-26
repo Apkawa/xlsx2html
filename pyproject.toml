@@ -8,7 +8,7 @@ dependencies = [
     "six",
     "openpyxl>=2.4.8",
     # number_re (используется в format/number.py) удалён в babel 2.18
-    "babel>=2.3.4,<2.18",
+    "babel>=2.3.4,<2.19",
     "packaging>=20.4",
 ]
 authors = [
@@ -54,7 +54,7 @@ dev = [
 webtest = [
   "playwright",
   "pytest-playwright",
-  "diffimg==0.2.3",
+  "diffimg==0.3.0",
   "pytest-image-diff>=0.0.14",
 ]
 
