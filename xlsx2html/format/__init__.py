@@ -1,5 +1,4 @@
 import datetime
-from html import escape as html_escape
 
 import six
 from babel.dates import LC_TIME
@@ -7,6 +6,7 @@ from babel.numbers import LC_NUMERIC
 from openpyxl.utils.escape import unescape
 
 from xlsx2html.constants import BUILTIN_FORMATS
+from xlsx2html.utils.html import SafeHTML, escape_html
 
 from .dt import format_date, format_datetime, format_time, format_timedelta
 from .hyperlink import format_hyperlink
@@ -19,12 +19,10 @@ def format_cell(cell, locale=None, f_cell=None):
     if isinstance(value, str):
         # Convert escaped strings to ASCIII: _x000a_ == \n
         value = unescape(value)
-        # Escape html in str value
-        value = html_escape(value)
-    formatted_value = value if value == 0 else value or "&nbsp;"
+    formatted_value = value if value == 0 else value or SafeHTML("&nbsp;")
     cell_format = cell.number_format
     if not cell_format:
-        return format_hyperlink(formatted_value, cell.hyperlink)
+        return format_hyperlink(escape_html(formatted_value), cell, f_cell)
 
     if isinstance(value, six.integer_types) or isinstance(value, float):
         if cell_format.lower() != "general":
@@ -49,6 +47,6 @@ def format_cell(cell, locale=None, f_cell=None):
     elif type(value) is datetime.timedelta:
         formatted_value = format_timedelta(value, cell_format)
 
-    formatted_value = format_hyperlink(formatted_value, cell, f_cell)
+    formatted_value = format_hyperlink(escape_html(formatted_value), cell, f_cell)
 
     return formatted_value

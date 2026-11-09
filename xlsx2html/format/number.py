@@ -5,6 +5,7 @@ from babel import Locale
 from babel.numbers import LC_NUMERIC, NumberPattern, parse_grouping
 
 from ..compat import number_re
+from ..utils.html import SafeHTML, escape_html
 
 ASTERISK_CLEAN_RE = re.compile(r"[*]")
 QUESTION_MARK_RE = re.compile(r"\?")
@@ -38,11 +39,10 @@ class ColorNumberPattern(NumberPattern):
             value = Decimal(str(value))
         value = value.scaleb(self.scale)
         is_negative = int(value.is_signed())
+        color = self.neg_color if is_negative else self.pos_color
         template = '<span style="color: {color}">{value}</span>'
-        if is_negative and self.neg_color:
-            return template.format(color=self.neg_color, value=formatted)
-        if not is_negative and self.pos_color:
-            return template.format(color=self.pos_color, value=formatted)
+        if color:
+            return SafeHTML(template.format(color=escape_html(color), value=escape_html(formatted)))
         return formatted
 
 
