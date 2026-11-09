@@ -16,13 +16,22 @@ from openpyxl.worksheet.worksheet import Worksheet
 from xlsx2html.compat import OPENPYXL_24
 from xlsx2html.constants.border import BORDER_STYLES, DEFAULT_BORDER_STYLE
 from xlsx2html.format import format_cell
+from xlsx2html.utils.html import SafeHTML, escape_html
 from xlsx2html.utils.image import bytes_to_datauri
 
 
 def render_attrs(attrs):
     if not attrs:
         return ""
-    return " ".join(['%s="%s"' % a for a in sorted(attrs.items(), key=lambda a: a[0]) if a[1]])
+    return SafeHTML(
+        " ".join(
+            [
+                f'{name}="{escape_html(value, accept_fragments=False)}"'
+                for name, value in sorted(attrs.items(), key=lambda a: a[0])
+                if value
+            ]
+        )
+    )
 
 
 def render_inline_styles(styles):
@@ -272,12 +281,9 @@ def render_table(data, append_headers, append_lineno):
     for col in data["cols"]:
         if col["hidden"]:
             hidden_columns.add(col["index"])
-        html.append(
-            '<col {attrs} style="{styles}">'.format(
-                attrs=render_attrs(col.get("attrs")),
-                styles=render_inline_styles(col.get("style")),
-            )
-        )
+        attrs = dict(col.get("attrs", ()))
+        attrs["style"] = render_inline_styles(col.get("style"))
+        html.append(f"<col {render_attrs(attrs)}>")
     html.append("</colgroup>")
 
     append_headers(data, html)
@@ -291,19 +297,21 @@ def render_table(data, append_headers, append_lineno):
             images = data["images"].get((cell["column"], cell["row"])) or []
             formatted_images = []
             for img in images:
-                styles = render_inline_styles(img["style"])
-                img_tag = (
-                    '<img width="{width}" height="{height}"style="{styles_str}"src="{src}"/>'
-                ).format(styles_str=styles, **img)
+                img_attrs = {
+                    "width": img["width"],
+                    "height": img["height"],
+                    "style": render_inline_styles(img["style"]),
+                    "src": img["src"],
+                }
+                img_tag = f"<img {render_attrs(img_attrs)} />"
                 formatted_images.append(img_tag)
+            cell_attrs = dict(cell["attrs"])
+            cell_attrs["style"] = render_inline_styles(cell["style"])
             trow.append(
-                (
-                    '<td {attrs_str} style="{styles_str}">{formatted_images}{formatted_value}</td>'
-                ).format(
-                    attrs_str=render_attrs(cell["attrs"]),
-                    styles_str=render_inline_styles(cell["style"]),
+                ("<td {attrs_str}>{formatted_images}{formatted_value}</td>").format(
+                    attrs_str=render_attrs(cell_attrs),
                     formatted_images="\n".join(formatted_images),
-                    **cell,
+                    formatted_value=escape_html(cell["formatted_value"]),
                 )
             )
 
@@ -361,8 +369,8 @@ def xlsx2html(
         if string sheet name.
         if number - sheet index. can also use list of names or indexes
     :param parse_formula:
-    :param append_headers:
-    :param append_lineno:
+    :param append_headers: trusted callback that may append raw HTML
+    :param append_lineno: trusted callback that may append raw HTML
     :param default_cell_border:
     :return:
     """

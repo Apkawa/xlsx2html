@@ -156,3 +156,8 @@ def test_issue_58(temp_file):
     # Must be escaped
     assert data_cell["value"] == "<script>alert(1)</script>"
     assert data_cell["formatted_value"] == "&lt;script&gt;alert(1)&lt;/script&gt;"
+
+    output = xlsx2html(get_fixture("issue_58.xlsx"))
+    rendered_html = output.getvalue()
+    assert "&lt;script&gt;alert(1)&lt;/script&gt;" in rendered_html
+    assert "&amp;lt;script&amp;gt;alert(1)&amp;lt;/script&amp;gt;" not in rendered_html

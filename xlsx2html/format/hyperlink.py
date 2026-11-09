@@ -1,6 +1,11 @@
+from urllib.parse import urlsplit
+
 from openpyxl.formula.tokenizer import Token, Tokenizer
 
 from xlsx2html.utils.cell import parse_cell_location
+from xlsx2html.utils.html import SafeHTML, escape_html
+
+SAFE_URL_SCHEMES = {"file", "http", "https", "mailto", "tel", "sms", "geo"}
 
 
 class HyperlinkType:
@@ -45,6 +50,17 @@ def resolve_hyperlink_formula(cell, f_cell):
     return None
 
 
+def is_safe_url(href: str):
+    # reject dangerous schemes like javascript:alert(1)
+    try:
+        url = urlsplit(href)
+        # we allow relative URLs, which is a bit questionable in context of Excel files,
+        # but it can't be used to do anything super nefarious
+        return url.scheme == "" or url.scheme.lower() in SAFE_URL_SCHEMES
+    except ValueError:
+        return False
+
+
 def format_hyperlink(value, cell, f_cell=None):
     hyperlink = HyperlinkType(title=value)
 
@@ -64,12 +80,19 @@ def format_hyperlink(value, cell, f_cell=None):
     else:
         href = hyperlink.target
 
+    if href is None:
+        return value
+    href = str(href)
+
     # Maybe link to cell
-    if href and href.startswith("#"):
+    if href.startswith("#"):
         location_info = parse_cell_location(href)
         if location_info:
             href = "#{}.{}".format(
                 location_info["sheet_name"] or cell.parent.title, location_info["coord"]
             )
 
-    return '<a href="{href}">{value}</a>'.format(href=href, value=value)
+    if not is_safe_url(href):
+        return value
+
+    return SafeHTML(f'<a href="{escape_html(href)}">{escape_html(value)}</a>')
